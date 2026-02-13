@@ -101,32 +101,14 @@ export default function AssessmentPage() {
   };
 
   return (
-    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', backgroundColor: '#000', color: '#fff' }}>
+    <div className="h-dvh flex flex-col bg-black text-white">
       {/* Header */}
-      <header style={{ 
-        flexShrink: 0, 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between',
-        padding: '16px 20px',
-        borderBottom: '1px solid rgba(255,255,255,0.1)'
-      }}>
-        <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)' }}>
-          TELESCOPIC
-        </div>
+      <header className="shrink-0 flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+        <span className="text-xs font-semibold tracking-widest text-zinc-500">TELESCOPIC</span>
         {messages.length >= 2 && (
           <button
             onClick={handleComplete}
-            style={{
-              fontSize: '12px',
-              fontWeight: 600,
-              padding: '8px 16px',
-              backgroundColor: '#fff',
-              color: '#000',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
+            className="text-xs font-semibold px-4 py-2 bg-white text-black rounded-lg"
           >
             Finish
           </button>
@@ -134,73 +116,46 @@ export default function AssessmentPage() {
       </header>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '24px 20px' }}>
-        {/* Task */}
+      <main className="flex-1 overflow-y-auto px-5 py-6">
+        {/* Task Card */}
         {messages.length === 0 && (
-          <div style={{
-            backgroundColor: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '12px',
-            padding: '16px',
-            marginBottom: '24px'
-          }}>
-            <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: '8px' }}>
-              TASK
-            </div>
-            <p style={{ fontSize: '14px', lineHeight: 1.6, color: 'rgba(255,255,255,0.7)', margin: 0 }}>
-              {TASK}
-            </p>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-6">
+            <p className="text-xs font-semibold tracking-widest text-zinc-500 mb-3">TASK</p>
+            <p className="text-sm leading-relaxed text-zinc-300">{TASK}</p>
           </div>
         )}
 
-        {/* Chat messages */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        {/* Messages */}
+        <div className="space-y-6">
           {messages.map((m) => (
             <div key={m.id}>
-              <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: '8px' }}>
+              <p className="text-xs font-semibold tracking-widest text-zinc-500 mb-2">
                 {m.role === "user" ? "YOU" : "AI"}
-              </div>
-              <div style={{ 
-                fontSize: '14px', 
-                lineHeight: 1.7, 
-                whiteSpace: 'pre-wrap',
-                color: m.role === "user" ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.6)'
-              }}>
+              </p>
+              <p className={`text-sm leading-relaxed whitespace-pre-wrap ${m.role === "user" ? "text-zinc-100" : "text-zinc-400"}`}>
                 {m.content}
-              </div>
+              </p>
             </div>
           ))}
 
           {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
             <div>
-              <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: '8px' }}>
-                AI
-              </div>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                <span style={{ width: '6px', height: '6px', backgroundColor: 'rgba(255,255,255,0.4)', borderRadius: '50%', animation: 'pulse 1s infinite' }} />
-                <span style={{ width: '6px', height: '6px', backgroundColor: 'rgba(255,255,255,0.4)', borderRadius: '50%', animation: 'pulse 1s infinite', animationDelay: '150ms' }} />
-                <span style={{ width: '6px', height: '6px', backgroundColor: 'rgba(255,255,255,0.4)', borderRadius: '50%', animation: 'pulse 1s infinite', animationDelay: '300ms' }} />
+              <p className="text-xs font-semibold tracking-widest text-zinc-500 mb-2">AI</p>
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse" />
+                <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse delay-150" />
+                <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse delay-300" />
               </div>
             </div>
           )}
         </div>
         <div ref={messagesEndRef} />
-      </div>
+      </main>
 
       {/* Input */}
-      <div style={{ 
-        flexShrink: 0, 
-        borderTop: '1px solid rgba(255,255,255,0.1)',
-        padding: '12px 20px',
-        paddingBottom: 'max(12px, env(safe-area-inset-bottom))'
-      }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '12px', alignItems: 'flex-end' }}>
-          <div style={{ 
-            flex: 1, 
-            backgroundColor: 'rgba(255,255,255,0.05)', 
-            borderRadius: '12px',
-            border: '1px solid rgba(255,255,255,0.1)'
-          }}>
+      <footer className="shrink-0 border-t border-zinc-800 px-5 py-3 pb-safe">
+        <form onSubmit={handleSubmit} className="flex gap-3 items-end">
+          <div className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl">
             <textarea
               ref={inputRef}
               value={input}
@@ -208,39 +163,19 @@ export default function AssessmentPage() {
               onKeyDown={handleKeyDown}
               placeholder="Message..."
               rows={1}
-              style={{
-                width: '100%',
-                backgroundColor: 'transparent',
-                border: 'none',
-                padding: '12px 16px',
-                fontSize: '14px',
-                color: '#fff',
-                resize: 'none',
-                outline: 'none',
-                fontFamily: 'inherit'
-              }}
+              className="w-full bg-transparent px-4 py-3 text-sm text-white placeholder-zinc-600 resize-none outline-none"
               disabled={isLoading}
             />
           </div>
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            style={{
-              padding: '12px 20px',
-              backgroundColor: '#fff',
-              color: '#000',
-              fontSize: '13px',
-              fontWeight: 600,
-              border: 'none',
-              borderRadius: '12px',
-              cursor: 'pointer',
-              opacity: (isLoading || !input.trim()) ? 0.3 : 1
-            }}
+            className="px-5 py-3 bg-white text-black text-sm font-semibold rounded-xl disabled:opacity-30"
           >
             Send
           </button>
         </form>
-      </div>
+      </footer>
     </div>
   );
 }

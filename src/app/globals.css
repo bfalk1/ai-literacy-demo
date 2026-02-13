@@ -10,6 +10,7 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  background: #000;
 }
 
 body {
@@ -18,20 +19,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
+/* Safe area for mobile */
+.pb-safe {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 
-::-webkit-scrollbar-track {
-  background: #1e293b;
+/* Dynamic viewport height */
+.h-dvh {
+  height: 100dvh;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #475569;
-  border-radius: 4px;
+/* Animation delays */
+.delay-150 {
+  animation-delay: 150ms;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+.delay-300 {
+  animation-delay: 300ms;
 }
