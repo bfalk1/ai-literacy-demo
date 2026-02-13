@@ -20,10 +20,10 @@ export default function Home() {
       <div className="w-full max-w-xs">
         <div className="mb-8">
           <h1 className="text-[22px] font-semibold text-white tracking-tight mb-1">
-            AI Assessment
+            Telescopic
           </h1>
           <p className="text-[14px] text-white/40">
-            Test your AI collaboration skills
+            AI collaboration assessment
           </p>
         </div>
 

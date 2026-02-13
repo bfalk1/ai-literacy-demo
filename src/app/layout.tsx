@@ -7,8 +7,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AI Literacy Assessment | HireUp",
-  description: "Test your ability to effectively collaborate with AI to accomplish real-world tasks.",
+  title: "Telescopic",
+  description: "AI collaboration assessment",
 };
 
 export default function RootLayout({
