@@ -38,8 +38,8 @@ export default function AssessmentPage() {
 
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.style.height = "auto";
-      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 200) + "px";
+      inputRef.current.style.height = "24px";
+      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 160) + "px";
     }
   }, [input]);
 
@@ -115,134 +115,102 @@ export default function AssessmentPage() {
 
   const handleComplete = () => {
     const duration = Math.round((Date.now() - startTime) / 1000);
-    const data = {
-      messages,
-      duration,
-      task: TASK,
-    };
+    const data = { messages, duration, task: TASK };
     localStorage.setItem("assessmentData", JSON.stringify(data));
     router.push("/results");
   };
 
-  const userCount = messages.filter((m) => m.role === "user").length;
-
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
-      {/* Chat Area */}
+    <div className="h-screen bg-[#000] flex flex-col overflow-hidden">
+      {/* Messages */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-4 py-6">
-          {/* Task Card */}
+        <div className="max-w-2xl mx-auto">
+          {/* Task */}
           {messages.length === 0 && (
-            <div className="mb-8 mt-12">
-              <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-white/10 rounded-2xl p-6">
-                <div className="flex items-center gap-2 text-blue-400 text-sm font-medium mb-3">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  Your Task
-                </div>
-                <p className="text-white/90 leading-relaxed">{TASK}</p>
-              </div>
+            <div className="px-5 pt-16 pb-8">
+              <div className="text-[13px] font-medium text-white/40 uppercase tracking-wide mb-3">Task</div>
+              <p className="text-[15px] text-white/80 leading-relaxed">{TASK}</p>
             </div>
           )}
 
-          {/* Messages */}
-          <div className="space-y-6">
-            {messages.map((m) => (
-              <div key={m.id} className="flex gap-4">
-                {/* Avatar */}
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  m.role === "user" 
-                    ? "bg-blue-600" 
-                    : "bg-gradient-to-br from-purple-500 to-pink-500"
-                }`}>
-                  {m.role === "user" ? (
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                  )}
+          {/* Chat */}
+          <div className="px-5 pb-32">
+            {messages.map((m, i) => (
+              <div
+                key={m.id}
+                className={`py-5 ${i !== 0 ? "border-t border-white/[0.04]" : ""}`}
+              >
+                <div className="text-[11px] font-medium text-white/30 uppercase tracking-wide mb-2">
+                  {m.role === "user" ? "You" : "Assistant"}
                 </div>
-                
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-white/50 text-xs mb-1.5">
-                    {m.role === "user" ? "You" : "AI Assistant"}
-                  </div>
-                  <div className="text-white/90 whitespace-pre-wrap leading-relaxed">
-                    {m.content}
-                  </div>
+                <div className="text-[15px] text-white/85 leading-[1.7] whitespace-pre-wrap">
+                  {m.content}
                 </div>
               </div>
             ))}
 
             {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-              <div className="flex gap-4">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
+              <div className="py-5 border-t border-white/[0.04]">
+                <div className="text-[11px] font-medium text-white/30 uppercase tracking-wide mb-2">
+                  Assistant
                 </div>
-                <div className="flex-1">
-                  <div className="text-white/50 text-xs mb-1.5">AI Assistant</div>
-                  <div className="flex gap-1.5">
-                    <div className="w-2 h-2 bg-white/30 rounded-full animate-pulse" />
-                    <div className="w-2 h-2 bg-white/30 rounded-full animate-pulse" style={{ animationDelay: "150ms" }} />
-                    <div className="w-2 h-2 bg-white/30 rounded-full animate-pulse" style={{ animationDelay: "300ms" }} />
-                  </div>
+                <div className="flex gap-1">
+                  <span className="w-1.5 h-1.5 bg-white/20 rounded-full animate-pulse" />
+                  <span className="w-1.5 h-1.5 bg-white/20 rounded-full animate-pulse [animation-delay:150ms]" />
+                  <span className="w-1.5 h-1.5 bg-white/20 rounded-full animate-pulse [animation-delay:300ms]" />
                 </div>
               </div>
             )}
-          </div>
 
-          <div ref={messagesEndRef} />
+            <div ref={messagesEndRef} />
+          </div>
         </div>
       </div>
 
-      {/* Input Area */}
-      <div className="border-t border-white/5 bg-[#0a0a0a]">
-        <div className="max-w-3xl mx-auto px-4 py-4">
-          <form onSubmit={handleSubmit} className="relative">
-            <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl overflow-hidden focus-within:border-white/20 transition-colors">
+      {/* Input */}
+      <div className="fixed bottom-0 inset-x-0 bg-gradient-to-t from-black via-black to-transparent pt-8 pb-5 px-5">
+        <div className="max-w-2xl mx-auto">
+          <form onSubmit={handleSubmit}>
+            <div className="bg-[#0f0f0f] border border-white/[0.08] rounded-xl flex items-end">
               <textarea
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Message AI..."
+                placeholder="Message..."
                 rows={1}
-                className="w-full bg-transparent px-4 py-4 pr-24 text-white placeholder-white/30 resize-none focus:outline-none"
+                className="flex-1 bg-transparent text-[15px] text-white placeholder-white/25 resize-none py-3 px-4 focus:outline-none leading-normal"
                 disabled={isLoading}
               />
-              <div className="absolute right-2 bottom-2 flex items-center gap-2">
+              <div className="flex items-center gap-1 p-2">
                 {messages.length >= 2 && (
                   <button
                     type="button"
                     onClick={handleComplete}
-                    className="px-3 py-1.5 text-xs font-medium text-green-400 hover:text-green-300 transition-colors"
+                    className="px-3 py-1.5 text-[13px] font-medium text-emerald-400 hover:text-emerald-300 rounded-lg hover:bg-white/[0.04] transition-colors"
                   >
-                    Submit Assessment
+                    Done
                   </button>
                 )}
                 <button
                   type="submit"
                   disabled={isLoading || !input.trim()}
-                  className="p-2 bg-white text-black rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/90 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center bg-white rounded-lg disabled:opacity-20 transition-opacity"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  <svg className="w-4 h-4 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
                   </svg>
                 </button>
               </div>
             </div>
           </form>
-          
-          <div className="flex items-center justify-between mt-3 text-xs text-white/30">
-            <span>{userCount} messages sent</span>
-            <span>Press Enter to send, Shift+Enter for new line</span>
+          <div className="flex items-center justify-between mt-2 px-1">
+            <span className="text-[11px] text-white/20">
+              {messages.filter(m => m.role === "user").length} messages
+            </span>
+            <span className="text-[11px] text-white/20">
+              ↵ send · ⇧↵ newline
+            </span>
           </div>
         </div>
       </div>

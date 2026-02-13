@@ -16,43 +16,36 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6">
-      <div className="max-w-sm w-full">
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-semibold text-white mb-2">
-            AI Collaboration Assessment
+    <div className="min-h-screen bg-[#000] flex items-center justify-center p-5">
+      <div className="w-full max-w-xs">
+        <div className="mb-8">
+          <h1 className="text-[22px] font-semibold text-white tracking-tight mb-1">
+            AI Assessment
           </h1>
-          <p className="text-white/50 text-sm">
-            Test your ability to work effectively with AI
+          <p className="text-[14px] text-white/40">
+            Test your AI collaboration skills
           </p>
         </div>
 
-        <form onSubmit={handleStart} className="space-y-4">
-          <div>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-              className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/30 focus:outline-none focus:border-white/20 transition-colors"
-              required
-            />
-          </div>
+        <form onSubmit={handleStart}>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your name"
+            className="w-full bg-[#0f0f0f] border border-white/[0.08] rounded-lg px-3.5 py-2.5 text-[15px] text-white placeholder-white/25 focus:outline-none focus:border-white/20 transition-colors mb-3"
+            required
+          />
           <button
             type="submit"
-            className="w-full py-3.5 bg-white text-black rounded-xl font-medium hover:bg-white/90 transition-colors"
+            className="w-full py-2.5 bg-white text-black text-[14px] font-medium rounded-lg hover:bg-white/90 transition-colors"
           >
-            Start Assessment
+            Start
           </button>
         </form>
 
-        <p className="text-white/30 text-xs text-center mt-8">
-          ~10 minutes · Chat-based · AI-evaluated
+        <p className="text-[12px] text-white/20 mt-6 text-center">
+          ~10 min · AI evaluated
         </p>
       </div>
     </div>
