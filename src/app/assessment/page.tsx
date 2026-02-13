@@ -26,6 +26,7 @@ You're helping assess their AI collaboration skills - make them demonstrate good
 export default function AssessmentPage() {
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [startTime] = useState(Date.now());
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -34,6 +35,13 @@ export default function AssessmentPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 200) + "px";
+    }
+  }, [input]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,6 +106,13 @@ export default function AssessmentPage() {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
   const handleComplete = () => {
     const duration = Math.round((Date.now() - startTime) / 1000);
     const data = {
@@ -112,99 +127,124 @@ export default function AssessmentPage() {
   const userCount = messages.filter((m) => m.role === "user").length;
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col">
-      {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-4 py-3">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <span className="text-white font-medium">AI Assessment</span>
-          <div className="flex items-center gap-3">
-            <span className="text-slate-400 text-sm">{userCount} messages</span>
-            <button
-              onClick={handleComplete}
-              disabled={messages.length < 2}
-              className="px-4 py-1.5 bg-green-600 hover:bg-green-500 disabled:bg-slate-700 disabled:text-slate-500 text-white text-sm rounded-lg font-medium transition-colors"
-            >
-              Submit
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Task */}
-      <div className="bg-blue-900/30 border-b border-blue-800/50 px-4 py-3">
-        <div className="max-w-3xl mx-auto">
-          <p className="text-blue-300 text-sm">
-            <span className="font-medium">Task:</span> {TASK}
-          </p>
-        </div>
-      </div>
-
-      {/* Chat */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
-        <div className="max-w-3xl mx-auto space-y-3">
+    <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
+      {/* Chat Area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl mx-auto px-4 py-6">
+          {/* Task Card */}
           {messages.length === 0 && (
-            <p className="text-slate-500 text-center py-8">
-              Start by asking the AI to help with the task above
-            </p>
-          )}
-
-          {messages.map((m) => (
-            <div
-              key={m.id}
-              className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[85%] rounded-xl px-4 py-2.5 text-sm ${
-                  m.role === "user"
-                    ? "bg-blue-600 text-white"
-                    : "bg-slate-800 text-slate-200"
-                }`}
-              >
-                <div className="whitespace-pre-wrap">{m.content}</div>
+            <div className="mb-8 mt-12">
+              <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-white/10 rounded-2xl p-6">
+                <div className="flex items-center gap-2 text-blue-400 text-sm font-medium mb-3">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Your Task
+                </div>
+                <p className="text-white/90 leading-relaxed">{TASK}</p>
               </div>
             </div>
-          ))}
+          )}
 
-          {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-            <div className="flex justify-start">
-              <div className="bg-slate-800 rounded-xl px-4 py-2.5">
-                <div className="flex gap-1">
-                  <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" />
-                  <div
-                    className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "150ms" }}
-                  />
-                  <div
-                    className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "300ms" }}
-                  />
+          {/* Messages */}
+          <div className="space-y-6">
+            {messages.map((m) => (
+              <div key={m.id} className="flex gap-4">
+                {/* Avatar */}
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  m.role === "user" 
+                    ? "bg-blue-600" 
+                    : "bg-gradient-to-br from-purple-500 to-pink-500"
+                }`}>
+                  {m.role === "user" ? (
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                </div>
+                
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="text-white/50 text-xs mb-1.5">
+                    {m.role === "user" ? "You" : "AI Assistant"}
+                  </div>
+                  <div className="text-white/90 whitespace-pre-wrap leading-relaxed">
+                    {m.content}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            ))}
+
+            {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
+              <div className="flex gap-4">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <div className="text-white/50 text-xs mb-1.5">AI Assistant</div>
+                  <div className="flex gap-1.5">
+                    <div className="w-2 h-2 bg-white/30 rounded-full animate-pulse" />
+                    <div className="w-2 h-2 bg-white/30 rounded-full animate-pulse" style={{ animationDelay: "150ms" }} />
+                    <div className="w-2 h-2 bg-white/30 rounded-full animate-pulse" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
 
           <div ref={messagesEndRef} />
         </div>
       </div>
 
-      {/* Input */}
-      <div className="bg-slate-800 border-t border-slate-700 px-4 py-3">
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex gap-2">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500"
-            disabled={isLoading}
-          />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 text-white text-sm rounded-lg font-medium transition-colors"
-          >
-            Send
-          </button>
-        </form>
+      {/* Input Area */}
+      <div className="border-t border-white/5 bg-[#0a0a0a]">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <form onSubmit={handleSubmit} className="relative">
+            <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl overflow-hidden focus-within:border-white/20 transition-colors">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Message AI..."
+                rows={1}
+                className="w-full bg-transparent px-4 py-4 pr-24 text-white placeholder-white/30 resize-none focus:outline-none"
+                disabled={isLoading}
+              />
+              <div className="absolute right-2 bottom-2 flex items-center gap-2">
+                {messages.length >= 2 && (
+                  <button
+                    type="button"
+                    onClick={handleComplete}
+                    className="px-3 py-1.5 text-xs font-medium text-green-400 hover:text-green-300 transition-colors"
+                  >
+                    Submit Assessment
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  disabled={isLoading || !input.trim()}
+                  className="p-2 bg-white text-black rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/90 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </form>
+          
+          <div className="flex items-center justify-between mt-3 text-xs text-white/30">
+            <span>{userCount} messages sent</span>
+            <span>Press Enter to send, Shift+Enter for new line</span>
+          </div>
+        </div>
       </div>
     </div>
   );
