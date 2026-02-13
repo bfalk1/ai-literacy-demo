@@ -29,8 +29,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} antialiased`}>
+    <html lang="en" style={{ overflowX: 'hidden' }}>
+      <body className={`${inter.className} antialiased`} style={{ overflowX: 'hidden', width: '100%', maxWidth: '100vw' }}>
         {children}
       </body>
     </html>
