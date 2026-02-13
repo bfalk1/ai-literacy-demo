@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface Analysis {
   score: number;
@@ -15,20 +15,64 @@ interface Analysis {
 export default function ResultsPage() {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saved, setSaved] = useState(false);
   const [candidateName, setCandidateName] = useState("");
   const [duration, setDuration] = useState(0);
   const [messageCount, setMessageCount] = useState(0);
+  const [assessmentData, setAssessmentData] = useState<any>(null);
+  const saveAttempted = useRef(false);
+
+  // Save assessment to Supabase
+  const saveAssessment = async (name: string, data: any, analysisResult: Analysis) => {
+    if (saveAttempted.current) return;
+    saveAttempted.current = true;
+    
+    try {
+      // Get ATS params from URL if present
+      const params = new URLSearchParams(window.location.search);
+      
+      const response = await fetch('/api/assessments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateName: name,
+          candidateEmail: params.get('email') || localStorage.getItem('candidateEmail'),
+          task: data.task,
+          duration: data.duration,
+          messages: data.messages,
+          analysis: analysisResult,
+          atsJobId: params.get('jobId'),
+          atsApplicationId: params.get('applicationId'),
+        }),
+      });
+      
+      if (response.ok) {
+        setSaved(true);
+        console.log('Assessment saved to database');
+      }
+    } catch (error) {
+      console.error('Failed to save assessment:', error);
+    }
+  };
 
   useEffect(() => {
-    setCandidateName(localStorage.getItem("candidateName") || "Candidate");
+    const name = localStorage.getItem("candidateName") || "Candidate";
+    setCandidateName(name);
     const data = localStorage.getItem("assessmentData");
     if (!data) { setLoading(false); return; }
     const parsed = JSON.parse(data);
+    setAssessmentData(parsed);
     setDuration(parsed.duration);
     setMessageCount(parsed.messages?.length || 0);
     fetch("/api/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(parsed) })
       .then(r => r.ok ? r.json() : null)
-      .then(r => { if (r) setAnalysis(r); })
+      .then(r => { 
+        if (r) {
+          setAnalysis(r);
+          // Save to Supabase after analysis completes
+          saveAssessment(name, parsed, r);
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 
