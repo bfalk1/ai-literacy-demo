@@ -38,8 +38,8 @@ export default function AssessmentPage() {
 
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.style.height = "24px";
-      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 160) + "px";
+      inputRef.current.style.height = "56px";
+      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 200) + "px";
     }
   }, [input]);
 
@@ -47,12 +47,7 @@ export default function AssessmentPage() {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: input,
-    };
-
+    const userMessage: Message = { id: Date.now().toString(), role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
@@ -62,10 +57,7 @@ export default function AssessmentPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [...messages, userMessage].map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
+          messages: [...messages, userMessage].map((m) => ({ role: m.role, content: m.content })),
           systemPrompt: SYSTEM_PROMPT,
         }),
       });
@@ -74,26 +66,15 @@ export default function AssessmentPage() {
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "",
-      };
-
+      const assistantMessage: Message = { id: (Date.now() + 1).toString(), role: "assistant", content: "" };
       setMessages((prev) => [...prev, assistantMessage]);
 
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          const chunk = decoder.decode(value);
-          assistantMessage.content += chunk;
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantMessage.id ? { ...m, content: assistantMessage.content } : m
-            )
-          );
+          assistantMessage.content += decoder.decode(value);
+          setMessages((prev) => prev.map((m) => m.id === assistantMessage.id ? { ...m, content: assistantMessage.content } : m));
         }
       }
     } catch (error) {
@@ -119,83 +100,108 @@ export default function AssessmentPage() {
   const userCount = messages.filter((m) => m.role === "user").length;
 
   return (
-    <div className="h-screen bg-[#000] flex flex-col overflow-hidden">
-      {/* Messages */}
+    <div className="h-screen bg-[#050505] flex flex-col">
+      {/* Header */}
+      <div className="flex-shrink-0 border-b border-white/[0.06] px-6 py-4">
+        <div className="max-w-3xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+              </svg>
+            </div>
+            <span className="text-white font-semibold">Telescopic</span>
+          </div>
+          {messages.length >= 2 && (
+            <button
+              onClick={handleComplete}
+              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-violet-600 rounded-lg hover:opacity-90 transition-opacity"
+            >
+              Submit Assessment
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Chat area */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-5 py-8">
-          {/* Task */}
+        <div className="max-w-3xl mx-auto px-6 py-8">
+          {/* Task card */}
           {messages.length === 0 && (
-            <div className="mb-12">
-              <p className="text-[13px] text-white/40 mb-3">Your task</p>
-              <p className="text-[15px] text-white/80 leading-relaxed">{TASK}</p>
+            <div className="bg-gradient-to-br from-indigo-500/10 to-violet-600/10 border border-indigo-500/20 rounded-2xl p-6 mb-8">
+              <div className="flex items-center gap-2 text-indigo-400 text-sm font-medium mb-3">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                </svg>
+                Your Task
+              </div>
+              <p className="text-white/80 leading-relaxed">{TASK}</p>
             </div>
           )}
 
           {/* Messages */}
-          {messages.map((m) => (
-            <div key={m.id} className="mb-6">
-              <p className="text-[13px] text-white/40 mb-2">
-                {m.role === "user" ? "You" : "Assistant"}
-              </p>
-              <p className="text-[15px] text-white/90 leading-relaxed whitespace-pre-wrap">
-                {m.content}
-              </p>
-            </div>
-          ))}
-
-          {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-            <div className="mb-6">
-              <p className="text-[13px] text-white/40 mb-2">Assistant</p>
-              <div className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-white/30 rounded-full animate-pulse" />
-                <span className="w-1.5 h-1.5 bg-white/30 rounded-full animate-pulse [animation-delay:150ms]" />
-                <span className="w-1.5 h-1.5 bg-white/30 rounded-full animate-pulse [animation-delay:300ms]" />
+          <div className="space-y-6">
+            {messages.map((m) => (
+              <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div className={`max-w-[85%] ${m.role === "user" ? "order-1" : ""}`}>
+                  <div className={`rounded-2xl px-5 py-4 ${
+                    m.role === "user" 
+                      ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white" 
+                      : "bg-white/[0.03] border border-white/[0.06] text-white/90"
+                  }`}>
+                    <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
+                  </div>
+                  <p className={`text-xs text-white/30 mt-2 ${m.role === "user" ? "text-right" : ""}`}>
+                    {m.role === "user" ? "You" : "AI Assistant"}
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            ))}
+
+            {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
+              <div className="flex justify-start">
+                <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" />
+                    <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse [animation-delay:150ms]" />
+                    <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse [animation-delay:300ms]" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
 
           <div ref={messagesEndRef} />
         </div>
       </div>
 
-      {/* Input */}
-      <div className="border-t border-white/[0.04] bg-[#000]">
-        <div className="max-w-2xl mx-auto px-5 py-4">
+      {/* Input area */}
+      <div className="flex-shrink-0 border-t border-white/[0.06] px-6 py-4">
+        <div className="max-w-3xl mx-auto">
           <form onSubmit={handleSubmit}>
-            <div className="flex items-end gap-2">
-              <div className="flex-1 bg-[#0f0f0f] border border-white/[0.08] rounded-lg overflow-hidden focus-within:border-white/20 transition-colors">
-                <textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Message..."
-                  rows={1}
-                  className="w-full bg-transparent text-[15px] text-white placeholder-white/25 resize-none px-4 py-3 focus:outline-none leading-normal"
-                  disabled={isLoading}
-                />
+            <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl focus-within:border-white/[0.15] transition-colors">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type your message..."
+                rows={1}
+                className="w-full bg-transparent text-white placeholder-white/30 resize-none px-5 py-4 focus:outline-none"
+                disabled={isLoading}
+              />
+              <div className="flex items-center justify-between px-5 pb-4">
+                <span className="text-sm text-white/30">{userCount} messages</span>
+                <button
+                  type="submit"
+                  disabled={isLoading || !input.trim()}
+                  className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-violet-600 rounded-lg hover:opacity-90 disabled:opacity-30 transition-opacity"
+                >
+                  Send
+                </button>
               </div>
-              <button
-                type="submit"
-                disabled={isLoading || !input.trim()}
-                className="px-4 py-3 bg-white text-black text-[14px] font-medium rounded-lg hover:bg-white/90 disabled:opacity-30 transition-all"
-              >
-                Send
-              </button>
             </div>
           </form>
-
-          <div className="flex items-center justify-between mt-3">
-            <p className="text-[13px] text-white/30">{userCount} messages</p>
-            {messages.length >= 2 && (
-              <button
-                onClick={handleComplete}
-                className="text-[13px] text-white/50 hover:text-white/70 transition-colors"
-              >
-                Finish assessment →
-              </button>
-            )}
-          </div>
         </div>
       </div>
     </div>
