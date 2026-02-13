@@ -31,6 +31,20 @@ export default function AssessmentPage() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
+
+  // Check for valid invitation
+  useEffect(() => {
+    const token = localStorage.getItem("invitationToken");
+    const candidateName = localStorage.getItem("candidateName");
+    
+    if (!token || !candidateName) {
+      router.push("/");
+      return;
+    }
+    
+    setAuthorized(true);
+  }, [router]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -99,6 +113,14 @@ export default function AssessmentPage() {
     }));
     router.push("/results");
   };
+
+  if (!authorized) {
+    return (
+      <div style={{ minHeight: '100dvh', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: '#71717a' }}>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{

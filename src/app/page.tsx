@@ -1,44 +1,8 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { getSupabase } from "@/lib/supabase";
 
-function HomeContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [companyName, setCompanyName] = useState<string | null>(null);
-  const companySlug = searchParams.get('company');
-
-  useEffect(() => {
-    if (companySlug) {
-      localStorage.setItem("companySlug", companySlug);
-      const supabase = getSupabase();
-      if (supabase) {
-        supabase
-          .from('companies')
-          .select('name')
-          .eq('slug', companySlug)
-          .single()
-          .then(({ data }) => {
-            if (data) setCompanyName(data.name);
-          });
-      }
-    }
-  }, [companySlug]);
-
-  const handleStart = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (name.trim()) {
-      localStorage.setItem("candidateName", name.trim());
-      if (email.trim()) localStorage.setItem("candidateEmail", email.trim());
-      router.push("/assessment");
-    }
-  };
-
+export default function Home() {
   return (
     <div style={{
       minHeight: '100dvh',
@@ -67,11 +31,6 @@ function HomeContent() {
         paddingTop: '40px',
         paddingBottom: '40px',
       }}>
-        {companyName && (
-          <p style={{ fontSize: '12px', color: '#71717a', marginBottom: '8px' }}>
-            Assessment for {companyName}
-          </p>
-        )}
         <h1 style={{ 
           fontSize: 'clamp(24px, 7vw, 32px)', 
           fontWeight: 600, 
@@ -80,7 +39,7 @@ function HomeContent() {
           marginBottom: '8px',
           lineHeight: 1.2,
         }}>
-          AI Collaboration
+          AI Collaboration Assessment
         </h1>
         <p style={{ 
           fontSize: 'clamp(14px, 4vw, 16px)', 
@@ -92,65 +51,20 @@ function HomeContent() {
           Measure how effectively candidates work with AI tools.
         </p>
 
-        <form onSubmit={handleStart} style={{ width: '100%', maxWidth: 'min(400px, 100%)' }}>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your name"
-            style={{
-              width: '100%',
-              backgroundColor: '#18181b',
-              border: '1px solid #27272a',
-              borderRadius: '12px',
-              padding: '16px',
-              fontSize: '16px',
-              color: '#fff',
-              outline: 'none',
-              marginBottom: '12px',
-              WebkitAppearance: 'none',
-            }}
-            required
-          />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email (optional)"
-            style={{
-              width: '100%',
-              backgroundColor: '#18181b',
-              border: '1px solid #27272a',
-              borderRadius: '12px',
-              padding: '16px',
-              fontSize: '16px',
-              color: '#fff',
-              outline: 'none',
-              marginBottom: '12px',
-              WebkitAppearance: 'none',
-            }}
-          />
-          <button
-            type="submit"
-            style={{
-              width: '100%',
-              backgroundColor: '#fff',
-              color: '#000',
-              fontSize: '16px',
-              fontWeight: 600,
-              padding: '16px',
-              borderRadius: '12px',
-              border: 'none',
-              cursor: 'pointer',
-              WebkitAppearance: 'none',
-            }}
-          >
-            Start assessment
-          </button>
-          <p style={{ fontSize: '13px', color: '#52525b', textAlign: 'center', marginTop: '16px' }}>
-            Takes about 10 minutes
+        <div style={{ 
+          backgroundColor: '#18181b', 
+          border: '1px solid #27272a', 
+          borderRadius: '12px', 
+          padding: '24px',
+          maxWidth: 'min(400px, 100%)',
+        }}>
+          <p style={{ fontSize: '14px', color: '#a1a1aa', marginBottom: '16px', lineHeight: 1.6 }}>
+            Assessments are invite-only. If you received an email invitation, click the link in that email to start your assessment.
           </p>
-        </form>
+          <p style={{ fontSize: '13px', color: '#52525b' }}>
+            Are you a company? <Link href="/auth/signup" style={{ color: '#fff', textDecoration: 'none' }}>Sign up</Link> to start assessing candidates.
+          </p>
+        </div>
       </main>
 
       {/* Footer */}
@@ -163,17 +77,5 @@ function HomeContent() {
         </p>
       </footer>
     </div>
-  );
-}
-
-export default function Home() {
-  return (
-    <Suspense fallback={
-      <div style={{ minHeight: '100dvh', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: '#71717a' }}>Loading...</p>
-      </div>
-    }>
-      <HomeContent />
-    </Suspense>
   );
 }

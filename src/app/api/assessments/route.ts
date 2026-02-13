@@ -19,19 +19,11 @@ export async function POST(request: NextRequest) {
       analysis,
       atsJobId,
       atsApplicationId,
-      companySlug,
+      companyId: providedCompanyId,
+      invitationToken,
     } = body;
     
-    // Look up company by slug if provided
-    let companyId = null;
-    if (companySlug) {
-      const { data: company } = await supabase
-        .from('companies')
-        .select('id')
-        .eq('slug', companySlug)
-        .single();
-      if (company) companyId = company.id;
-    }
+    let companyId = providedCompanyId || null;
 
     const { data, error } = await supabase
       .from('assessments')
@@ -62,6 +54,17 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Supabase error:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Mark invitation as used if token provided
+    if (invitationToken && data) {
+      await supabase
+        .from('invitations')
+        .update({ 
+          used_at: new Date().toISOString(),
+          assessment_id: data.id,
+        })
+        .eq('token', invitationToken);
     }
 
     return NextResponse.json({ success: true, id: data.id });

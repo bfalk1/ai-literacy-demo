@@ -28,28 +28,36 @@ export default function ResultsPage() {
     saveAttempted.current = true;
     
     try {
-      // Get ATS params from URL if present
-      const params = new URLSearchParams(window.location.search);
-      const companySlug = localStorage.getItem('companySlug');
+      // Get invitation data from localStorage
+      const invitationToken = localStorage.getItem('invitationToken');
+      const companyId = localStorage.getItem('companyId');
+      const atsJobId = localStorage.getItem('atsJobId');
+      const atsApplicationId = localStorage.getItem('atsApplicationId');
       
       const response = await fetch('/api/assessments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           candidateName: name,
-          candidateEmail: params.get('email') || localStorage.getItem('candidateEmail'),
+          candidateEmail: localStorage.getItem('candidateEmail'),
           task: data.task,
           duration: data.duration,
           messages: data.messages,
           analysis: analysisResult,
-          atsJobId: params.get('jobId'),
-          atsApplicationId: params.get('applicationId'),
-          companySlug,
+          atsJobId,
+          atsApplicationId,
+          companyId,
+          invitationToken,
         }),
       });
       
       if (response.ok) {
         setSaved(true);
+        // Clear invitation data after successful save
+        localStorage.removeItem('invitationToken');
+        localStorage.removeItem('companyId');
+        localStorage.removeItem('atsJobId');
+        localStorage.removeItem('atsApplicationId');
         console.log('Assessment saved to database');
       }
     } catch (error) {
