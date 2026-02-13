@@ -36,18 +36,18 @@ export default function ResultsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white/50">Analyzing...</div>
+      <div className="min-h-dvh bg-black flex items-center justify-center px-5">
+        <p className="text-zinc-500 text-sm">Analyzing...</p>
       </div>
     );
   }
 
   if (!analysis) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-dvh bg-black flex items-center justify-center px-5">
         <div className="text-center">
-          <p className="text-white/50 mb-4">No data found</p>
-          <Link href="/" className="text-white/70 hover:text-white">Start over →</Link>
+          <p className="text-zinc-500 text-sm mb-4">No data found</p>
+          <Link href="/" className="text-zinc-400 text-sm hover:text-white">Start over →</Link>
         </div>
       </div>
     );
@@ -61,59 +61,60 @@ export default function ResultsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-dvh bg-black text-white">
       {/* Header */}
-      <header className="px-6 py-4 border-b border-white/5">
-        <div className="text-sm font-medium tracking-wide text-white/50">TELESCOPIC</div>
+      <header className="px-5 py-4 border-b border-zinc-800">
+        <span className="text-xs font-semibold tracking-widest text-zinc-500">TELESCOPIC</span>
       </header>
 
-      <main className="max-w-2xl mx-auto px-6 py-16">
+      {/* Content */}
+      <main className="px-5 py-8 max-w-lg mx-auto">
         {/* Score */}
-        <div className="mb-16">
-          <div className="text-xs font-medium tracking-wide text-white/30 uppercase mb-2">{candidateName}</div>
-          <div className="flex items-baseline gap-4">
-            <span className="text-8xl font-medium tabular-nums">{analysis.score}</span>
-            <span className="text-2xl text-white/30">/100</span>
+        <div className="mb-10">
+          <p className="text-xs font-semibold tracking-widest text-zinc-500 mb-1">{candidateName}</p>
+          <div className="flex items-baseline gap-3">
+            <span className="text-6xl font-semibold tabular-nums">{analysis.score}</span>
+            <span className="text-xl text-zinc-600">/100</span>
           </div>
-          <div className="mt-4 flex gap-6 text-sm text-white/40">
+          <div className="flex gap-4 mt-3 text-xs text-zinc-500">
             <span>{formatTime(duration)}</span>
             <span>{Math.ceil(messageCount / 2)} prompts</span>
           </div>
         </div>
 
         {/* Metrics */}
-        <div className="space-y-8 mb-16">
+        <div className="space-y-6 mb-10">
           {metrics.map((m) => (
             <div key={m.label}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-white/50">{m.label}</span>
-                <span className="text-sm tabular-nums">{m.value.score}</span>
+                <span className="text-sm text-zinc-400">{m.label}</span>
+                <span className="text-sm font-medium tabular-nums">{m.value.score}</span>
               </div>
-              <div className="h-1 bg-white/5 rounded-full overflow-hidden mb-3">
-                <div className="h-full bg-white/50 rounded-full" style={{ width: `${m.value.score}%` }} />
+              <div className="h-1 bg-zinc-900 rounded-full overflow-hidden mb-2">
+                <div className="h-full bg-zinc-500 rounded-full" style={{ width: `${m.value.score}%` }} />
               </div>
-              <p className="text-sm text-white/40">{m.value.feedback}</p>
+              <p className="text-xs text-zinc-600">{m.value.feedback}</p>
             </div>
           ))}
         </div>
 
         {/* Summary */}
-        <div className="mb-16">
-          <div className="text-xs font-medium tracking-wide text-white/30 uppercase mb-4">Summary</div>
-          <p className="text-white/60 leading-relaxed">{analysis.summary}</p>
+        <div className="mb-10">
+          <p className="text-xs font-semibold tracking-widest text-zinc-500 mb-3">SUMMARY</p>
+          <p className="text-sm text-zinc-400 leading-relaxed">{analysis.summary}</p>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-4">
+        <div className="flex gap-3 pb-safe">
           <Link
             href="/"
-            className="flex-1 py-4 text-center text-sm font-medium text-white/50 bg-white/5 rounded-xl hover:bg-white/10 transition-colors"
+            className="flex-1 py-3.5 text-center text-sm font-medium text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-xl"
           >
             New assessment
           </Link>
           <button
             onClick={() => window.print()}
-            className="flex-1 py-4 text-sm font-medium bg-white text-black rounded-xl hover:bg-white/90 transition-colors"
+            className="flex-1 py-3.5 text-sm font-semibold bg-white text-black rounded-xl"
           >
             Export
           </button>
