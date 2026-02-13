@@ -26,136 +26,99 @@ export default function ResultsPage() {
     const parsed = JSON.parse(data);
     setDuration(parsed.duration);
     setMessageCount(parsed.messages?.length || 0);
-    analyzePerformance(parsed);
+    fetch("/api/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(parsed) })
+      .then(r => r.ok ? r.json() : null)
+      .then(r => { if (r) setAnalysis(r); })
+      .finally(() => setLoading(false));
   }, []);
 
-  const analyzePerformance = async (data: { messages: { role: string; content: string }[]; task: string; duration: number }) => {
-    try {
-      const response = await fetch("/api/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
-      if (response.ok) setAnalysis(await response.json());
-    } catch (error) { console.error("Analysis error:", error); }
-    finally { setLoading(false); }
-  };
-
-  const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
+  const formatTime = (s: number) => `${Math.floor(s / 60)}m ${s % 60}s`;
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-10 h-10 mx-auto mb-4 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin" />
-          <p className="text-white/50">Analyzing your performance...</p>
-        </div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white/50">Analyzing...</div>
       </div>
     );
   }
 
   if (!analysis) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <p className="text-white/50 mb-4">No assessment data found</p>
-          <Link href="/" className="text-indigo-400 hover:text-indigo-300">Start over →</Link>
+          <p className="text-white/50 mb-4">No data found</p>
+          <Link href="/" className="text-white/70 hover:text-white">Start over →</Link>
         </div>
       </div>
     );
   }
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return { text: "text-emerald-400", bg: "from-emerald-500 to-emerald-400" };
-    if (score >= 60) return { text: "text-amber-400", bg: "from-amber-500 to-amber-400" };
-    return { text: "text-rose-400", bg: "from-rose-500 to-rose-400" };
-  };
-
   const metrics = [
-    { label: "Prompt Quality", desc: "Clarity and specificity of instructions", ...analysis.promptQuality },
-    { label: "Context Provided", desc: "Relevant details and background given", ...analysis.contextProvided },
-    { label: "Iteration", desc: "Ability to refine and improve output", ...analysis.iteration },
-    { label: "Efficiency", desc: "Task completion with minimal back-and-forth", ...analysis.efficiency },
+    { label: "Prompt Quality", value: analysis.promptQuality },
+    { label: "Context", value: analysis.contextProvided },
+    { label: "Iteration", value: analysis.iteration },
+    { label: "Efficiency", value: analysis.efficiency },
   ];
 
   return (
-    <div className="min-h-screen bg-[#050505]">
+    <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <div className="border-b border-white/[0.06] px-6 py-4">
-        <div className="max-w-2xl mx-auto flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-            </svg>
+      <header className="px-6 py-4 border-b border-white/5">
+        <div className="text-sm font-medium tracking-wide text-white/50">TELESCOPIC</div>
+      </header>
+
+      <main className="max-w-2xl mx-auto px-6 py-16">
+        {/* Score */}
+        <div className="mb-16">
+          <div className="text-xs font-medium tracking-wide text-white/30 uppercase mb-2">{candidateName}</div>
+          <div className="flex items-baseline gap-4">
+            <span className="text-8xl font-medium tabular-nums">{analysis.score}</span>
+            <span className="text-2xl text-white/30">/100</span>
           </div>
-          <span className="text-white font-semibold">Telescopic</span>
-        </div>
-      </div>
-
-      <div className="max-w-2xl mx-auto px-6 py-12">
-        {/* Candidate info */}
-        <p className="text-white/40 text-sm">{candidateName}</p>
-        <h1 className="text-3xl font-bold text-white mt-1 mb-8">Assessment Results</h1>
-
-        {/* Score card */}
-        <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/[0.06] rounded-2xl p-8 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <p className="text-white/40 text-sm mb-1">Overall Score</p>
-              <p className={`text-6xl font-bold ${getScoreColor(analysis.score).text}`}>{analysis.score}</p>
-            </div>
-            <div className="text-right text-white/40">
-              <p>{formatTime(duration)} duration</p>
-              <p>{Math.ceil(messageCount / 2)} prompts sent</p>
-            </div>
-          </div>
-
-          {/* Score bar */}
-          <div className="h-3 bg-white/[0.06] rounded-full overflow-hidden">
-            <div 
-              className={`h-full rounded-full bg-gradient-to-r ${getScoreColor(analysis.score).bg}`}
-              style={{ width: `${analysis.score}%` }}
-            />
+          <div className="mt-4 flex gap-6 text-sm text-white/40">
+            <span>{formatTime(duration)}</span>
+            <span>{Math.ceil(messageCount / 2)} prompts</span>
           </div>
         </div>
 
         {/* Metrics */}
-        <div className="space-y-6 mb-8">
+        <div className="space-y-8 mb-16">
           {metrics.map((m) => (
-            <div key={m.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <p className="text-white font-medium">{m.label}</p>
-                  <p className="text-white/40 text-sm">{m.desc}</p>
-                </div>
-                <span className={`text-2xl font-bold ${getScoreColor(m.score).text}`}>{m.score}</span>
+            <div key={m.label}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-white/50">{m.label}</span>
+                <span className="text-sm tabular-nums">{m.value.score}</span>
               </div>
-              <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden mb-3">
-                <div className={`h-full rounded-full bg-gradient-to-r ${getScoreColor(m.score).bg}`} style={{ width: `${m.score}%` }} />
+              <div className="h-1 bg-white/5 rounded-full overflow-hidden mb-3">
+                <div className="h-full bg-white/50 rounded-full" style={{ width: `${m.value.score}%` }} />
               </div>
-              <p className="text-white/50 text-sm">{m.feedback}</p>
+              <p className="text-sm text-white/40">{m.value.feedback}</p>
             </div>
           ))}
         </div>
 
         {/* Summary */}
-        <div className="bg-gradient-to-br from-indigo-500/10 to-violet-600/10 border border-indigo-500/20 rounded-2xl p-6 mb-8">
-          <p className="text-indigo-400 text-sm font-medium mb-2">Summary</p>
-          <p className="text-white/80 leading-relaxed">{analysis.summary}</p>
+        <div className="mb-16">
+          <div className="text-xs font-medium tracking-wide text-white/30 uppercase mb-4">Summary</div>
+          <p className="text-white/60 leading-relaxed">{analysis.summary}</p>
         </div>
 
         {/* Actions */}
         <div className="flex gap-4">
           <Link
             href="/"
-            className="flex-1 py-4 text-center font-medium text-white/70 bg-white/[0.03] border border-white/[0.06] rounded-xl hover:bg-white/[0.05] transition-colors"
+            className="flex-1 py-4 text-center text-sm font-medium text-white/50 bg-white/5 rounded-xl hover:bg-white/10 transition-colors"
           >
-            New Assessment
+            New assessment
           </Link>
           <button
             onClick={() => window.print()}
-            className="flex-1 py-4 font-medium text-white bg-gradient-to-r from-indigo-500 to-violet-600 rounded-xl hover:opacity-90 transition-opacity"
+            className="flex-1 py-4 text-sm font-medium bg-white text-black rounded-xl hover:bg-white/90 transition-colors"
           >
-            Export Results
+            Export
           </button>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

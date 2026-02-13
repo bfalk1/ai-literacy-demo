@@ -6,6 +6,7 @@ import { useState } from "react";
 export default function Home() {
   const router = useRouter();
   const [name, setName] = useState("");
+  const [focused, setFocused] = useState(false);
 
   const handleStart = (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,55 +17,79 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] flex flex-col">
-      {/* Main content */}
-      <div className="flex-1 flex items-center justify-center px-6">
-        <div className="w-full max-w-md">
-          {/* Logo mark */}
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 mb-8 flex items-center justify-center">
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-            </svg>
-          </div>
+    <div className="min-h-screen bg-black text-white">
+      {/* Subtle grid background */}
+      <div 
+        className="fixed inset-0 opacity-[0.02]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}
+      />
+      
+      <div className="relative min-h-screen flex flex-col">
+        {/* Nav */}
+        <nav className="p-6">
+          <div className="text-sm font-medium tracking-wide text-white/50">TELESCOPIC</div>
+        </nav>
 
-          {/* Title */}
-          <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight leading-[1.1]">
-            Telescopic
-          </h1>
-          <p className="text-lg text-white/40 mt-4 mb-12">
-            Measure AI collaboration skills in 10 minutes
-          </p>
-
-          {/* Form */}
-          <form onSubmit={handleStart} className="space-y-4">
+        {/* Main */}
+        <main className="flex-1 flex items-center">
+          <div className="w-full max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left - Copy */}
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-2">
-                Candidate name
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter full name"
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-4 text-base text-white placeholder-white/20 focus:outline-none focus:bg-white/[0.05] focus:border-white/[0.15] transition-all"
-                required
-              />
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-medium tracking-tight leading-[1.05]">
+                Measure AI
+                <br />
+                <span className="text-white/40">collaboration</span>
+              </h1>
+              <p className="mt-6 text-lg text-white/50 max-w-md leading-relaxed">
+                A 10-minute assessment that reveals how effectively candidates work with AI tools.
+              </p>
             </div>
-            <button
-              type="submit"
-              className="w-full py-4 bg-gradient-to-r from-indigo-500 to-violet-600 text-white text-base font-semibold rounded-xl hover:opacity-90 transition-opacity"
-            >
-              Begin Assessment
-            </button>
-          </form>
-        </div>
-      </div>
 
-      {/* Footer */}
-      <div className="px-6 py-6 text-center">
-        <p className="text-sm text-white/20">
-          Powered by HireUp
-        </p>
+            {/* Right - Form */}
+            <div className="lg:justify-self-end w-full max-w-sm">
+              <form onSubmit={handleStart}>
+                <div className="space-y-3">
+                  <div 
+                    className={`
+                      relative rounded-xl transition-all duration-200
+                      ${focused ? 'ring-2 ring-white/20' : ''}
+                    `}
+                  >
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      onFocus={() => setFocused(true)}
+                      onBlur={() => setFocused(false)}
+                      placeholder="Candidate name"
+                      className="w-full bg-white/5 rounded-xl px-5 py-4 text-white placeholder-white/30 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-white text-black font-medium py-4 rounded-xl hover:bg-white/90 transition-colors"
+                  >
+                    Start assessment
+                  </button>
+                </div>
+              </form>
+              <p className="mt-4 text-sm text-white/30 text-center">
+                No account required
+              </p>
+            </div>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="p-6">
+          <div className="flex items-center justify-between text-sm text-white/30">
+            <span>© 2026</span>
+            <span>Powered by HireUp</span>
+          </div>
+        </footer>
       </div>
     </div>
   );
