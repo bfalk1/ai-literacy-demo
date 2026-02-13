@@ -16,37 +16,59 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-dvh bg-black text-white flex flex-col px-6">
+    <div className="page-container min-h-dvh bg-black text-white flex flex-col">
       {/* Header */}
       <header className="py-5">
-        <span className="text-xs font-semibold tracking-widest text-zinc-500">TELESCOPIC</span>
+        <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a' }}>
+          TELESCOPIC
+        </span>
       </header>
 
       {/* Main */}
       <main className="flex-1 flex flex-col justify-center py-12">
-        <h1 className="text-3xl font-semibold tracking-tight text-white mb-2">
+        <h1 style={{ fontSize: '28px', fontWeight: 600, letterSpacing: '-0.02em', color: '#fff', marginBottom: '8px' }}>
           AI Collaboration
         </h1>
-        <p className="text-base text-zinc-500 mb-10 max-w-xs">
+        <p style={{ fontSize: '16px', color: '#71717a', marginBottom: '40px', maxWidth: '300px', lineHeight: 1.5 }}>
           Measure how effectively candidates work with AI tools.
         </p>
 
-        <form onSubmit={handleStart} className="w-full max-w-sm">
+        <form onSubmit={handleStart} style={{ width: '100%', maxWidth: '360px' }}>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Candidate name"
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-4 text-base text-white placeholder-zinc-600 outline-none focus:border-zinc-600 mb-3"
+            style={{
+              width: '100%',
+              backgroundColor: '#18181b',
+              border: '1px solid #27272a',
+              borderRadius: '12px',
+              padding: '16px',
+              fontSize: '16px',
+              color: '#fff',
+              outline: 'none',
+              marginBottom: '12px'
+            }}
             required
           />
           <button
             type="submit"
-            className="w-full bg-white text-black text-base font-semibold py-4 rounded-xl"
+            style={{
+              width: '100%',
+              backgroundColor: '#fff',
+              color: '#000',
+              fontSize: '16px',
+              fontWeight: 600,
+              padding: '16px',
+              borderRadius: '12px',
+              border: 'none',
+              cursor: 'pointer'
+            }}
           >
             Start assessment
           </button>
-          <p className="text-sm text-zinc-600 text-center mt-4">
+          <p style={{ fontSize: '14px', color: '#52525b', textAlign: 'center', marginTop: '16px' }}>
             Takes about 10 minutes
           </p>
         </form>
@@ -54,7 +76,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="py-5 pb-safe">
-        <p className="text-xs text-zinc-700">
+        <p style={{ fontSize: '12px', color: '#3f3f46' }}>
           Powered by HireUp
         </p>
       </footer>

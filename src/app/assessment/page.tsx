@@ -101,14 +101,32 @@ export default function AssessmentPage() {
   };
 
   return (
-    <div className="h-dvh flex flex-col bg-black text-white">
+    <div className="h-dvh bg-black text-white flex flex-col">
       {/* Header */}
-      <header className="shrink-0 flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-        <span className="text-xs font-semibold tracking-widest text-zinc-500">TELESCOPIC</span>
+      <header style={{ 
+        flexShrink: 0, 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        padding: '16px 24px',
+        borderBottom: '1px solid #27272a'
+      }}>
+        <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a' }}>
+          TELESCOPIC
+        </span>
         {messages.length >= 2 && (
           <button
             onClick={handleComplete}
-            className="text-xs font-semibold px-4 py-2 bg-white text-black rounded-lg"
+            style={{
+              fontSize: '12px',
+              fontWeight: 600,
+              padding: '8px 16px',
+              backgroundColor: '#fff',
+              color: '#000',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
           >
             Finish
           </button>
@@ -116,23 +134,39 @@ export default function AssessmentPage() {
       </header>
 
       {/* Messages */}
-      <main className="flex-1 overflow-y-auto px-5 py-6">
-        {/* Task Card */}
+      <main style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+        {/* Task */}
         {messages.length === 0 && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-6">
-            <p className="text-xs font-semibold tracking-widest text-zinc-500 mb-3">TASK</p>
-            <p className="text-sm leading-relaxed text-zinc-300">{TASK}</p>
+          <div style={{
+            backgroundColor: '#18181b',
+            border: '1px solid #27272a',
+            borderRadius: '12px',
+            padding: '16px',
+            marginBottom: '24px'
+          }}>
+            <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a', marginBottom: '8px' }}>
+              TASK
+            </p>
+            <p style={{ fontSize: '14px', lineHeight: 1.6, color: '#a1a1aa', margin: 0 }}>
+              {TASK}
+            </p>
           </div>
         )}
 
-        {/* Messages */}
-        <div className="space-y-6">
+        {/* Chat */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {messages.map((m) => (
             <div key={m.id}>
-              <p className="text-xs font-semibold tracking-widest text-zinc-500 mb-2">
+              <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a', marginBottom: '8px' }}>
                 {m.role === "user" ? "YOU" : "AI"}
               </p>
-              <p className={`text-sm leading-relaxed whitespace-pre-wrap ${m.role === "user" ? "text-zinc-100" : "text-zinc-400"}`}>
+              <p style={{ 
+                fontSize: '14px', 
+                lineHeight: 1.7, 
+                whiteSpace: 'pre-wrap',
+                color: m.role === "user" ? '#e4e4e7' : '#a1a1aa',
+                margin: 0
+              }}>
                 {m.content}
               </p>
             </div>
@@ -140,11 +174,13 @@ export default function AssessmentPage() {
 
           {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
             <div>
-              <p className="text-xs font-semibold tracking-widest text-zinc-500 mb-2">AI</p>
-              <div className="flex gap-1">
-                <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse" />
-                <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse delay-150" />
-                <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse delay-300" />
+              <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a', marginBottom: '8px' }}>
+                AI
+              </p>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <span style={{ width: '6px', height: '6px', backgroundColor: '#71717a', borderRadius: '50%' }} />
+                <span style={{ width: '6px', height: '6px', backgroundColor: '#71717a', borderRadius: '50%' }} />
+                <span style={{ width: '6px', height: '6px', backgroundColor: '#71717a', borderRadius: '50%' }} />
               </div>
             </div>
           )}
@@ -153,9 +189,19 @@ export default function AssessmentPage() {
       </main>
 
       {/* Input */}
-      <footer className="shrink-0 border-t border-zinc-800 px-5 py-3 pb-safe">
-        <form onSubmit={handleSubmit} className="flex gap-3 items-end">
-          <div className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl">
+      <footer style={{ 
+        flexShrink: 0, 
+        borderTop: '1px solid #27272a',
+        padding: '12px 24px',
+        paddingBottom: 'max(12px, env(safe-area-inset-bottom))'
+      }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '12px', alignItems: 'flex-end' }}>
+          <div style={{ 
+            flex: 1, 
+            backgroundColor: '#18181b', 
+            borderRadius: '12px',
+            border: '1px solid #27272a'
+          }}>
             <textarea
               ref={inputRef}
               value={input}
@@ -163,14 +209,34 @@ export default function AssessmentPage() {
               onKeyDown={handleKeyDown}
               placeholder="Message..."
               rows={1}
-              className="w-full bg-transparent px-4 py-3 text-sm text-white placeholder-zinc-600 resize-none outline-none"
+              style={{
+                width: '100%',
+                backgroundColor: 'transparent',
+                border: 'none',
+                padding: '12px 16px',
+                fontSize: '14px',
+                color: '#fff',
+                resize: 'none',
+                outline: 'none',
+                fontFamily: 'inherit'
+              }}
               disabled={isLoading}
             />
           </div>
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="px-5 py-3 bg-white text-black text-sm font-semibold rounded-xl disabled:opacity-30"
+            style={{
+              padding: '12px 20px',
+              backgroundColor: '#fff',
+              color: '#000',
+              fontSize: '14px',
+              fontWeight: 600,
+              border: 'none',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              opacity: (isLoading || !input.trim()) ? 0.3 : 1
+            }}
           >
             Send
           </button>
