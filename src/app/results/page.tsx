@@ -1,25 +1,60 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { useEffect, useState } from "react";
 
-function ResultsContent() {
-  const searchParams = useSearchParams();
-  const scenario = searchParams.get("scenario") || "unknown";
-  const turns = parseInt(searchParams.get("turns") || "0");
-  const time = parseInt(searchParams.get("time") || "0");
+interface Analysis {
+  score: number;
+  promptQuality: { score: number; feedback: string };
+  iteration: { score: number; feedback: string };
+  contextProvided: { score: number; feedback: string };
+  efficiency: { score: number; feedback: string };
+  summary: string;
+}
 
-  const scenarioNames: Record<string, string> = {
-    legal: "Legal Assistant",
-    marketing: "Marketing Coordinator",
-    finance: "Financial Analyst",
+export default function ResultsPage() {
+  const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [candidateName, setCandidateName] = useState("");
+  const [duration, setDuration] = useState(0);
+  const [messageCount, setMessageCount] = useState(0);
+
+  useEffect(() => {
+    const name = localStorage.getItem("candidateName") || "Candidate";
+    setCandidateName(name);
+
+    const data = localStorage.getItem("assessmentData");
+    if (!data) {
+      setLoading(false);
+      return;
+    }
+
+    const parsed = JSON.parse(data);
+    setDuration(parsed.duration);
+    setMessageCount(parsed.messages?.length || 0);
+
+    // Get AI analysis
+    analyzePerformance(parsed);
+  }, []);
+
+  const analyzePerformance = async (data: { messages: { role: string; content: string }[]; task: string; duration: number }) => {
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setAnalysis(result);
+      }
+    } catch (error) {
+      console.error("Analysis error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  // Simple scoring logic (in real app, this would be AI-evaluated)
-  const efficiencyScore = Math.min(100, Math.max(0, 100 - (turns - 4) * 10));
-  const timeScore = time < 300 ? 90 : time < 600 ? 70 : 50;
-  const overallScore = Math.round((efficiencyScore + timeScore) / 2);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -27,121 +62,137 @@ function ResultsContent() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-green-400";
+    if (score >= 60) return "text-yellow-400";
+    return "text-red-400";
+  };
+
+  const getScoreBar = (score: number) => {
+    const color = score >= 80 ? "bg-green-500" : score >= 60 ? "bg-yellow-500" : "bg-red-500";
+    return (
+      <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+        <div className={`h-full ${color} rounded-full`} style={{ width: `${score}%` }} />
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-slate-400">Analyzing your performance...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!analysis) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center px-6">
+        <div className="text-center">
+          <p className="text-slate-400 mb-4">No assessment data found</p>
+          <Link href="/" className="text-blue-400 hover:text-blue-300">
+            Start new assessment
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="max-w-2xl mx-auto px-6 py-16">
+    <div className="min-h-screen bg-slate-900 px-4 py-8">
+      <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="text-6xl mb-4">🎉</div>
-          <h1 className="text-4xl font-bold text-white mb-2">Assessment Complete!</h1>
-          <p className="text-slate-400">{scenarioNames[scenario] || scenario}</p>
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-white mb-1">Assessment Complete</h1>
+          <p className="text-slate-400">{candidateName}</p>
         </div>
 
-        {/* Score Card */}
-        <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 mb-8">
-          <div className="text-center mb-8">
-            <div className="text-7xl font-bold text-white mb-2">{overallScore}</div>
-            <div className="text-slate-400">Overall Score</div>
+        {/* Overall Score */}
+        <div className="bg-slate-800 rounded-xl p-6 mb-6 text-center">
+          <div className={`text-6xl font-bold mb-2 ${getScoreColor(analysis.score)}`}>
+            {analysis.score}
           </div>
-
-          <div className="grid grid-cols-2 gap-6">
-            <div className="bg-slate-900/50 rounded-xl p-4 text-center">
-              <div className="text-3xl font-semibold text-blue-400">{Math.ceil(turns / 2)}</div>
-              <div className="text-slate-400 text-sm">Prompts Used</div>
-            </div>
-            <div className="bg-slate-900/50 rounded-xl p-4 text-center">
-              <div className="text-3xl font-semibold text-green-400">{formatTime(time)}</div>
-              <div className="text-slate-400 text-sm">Time Taken</div>
-            </div>
+          <p className="text-slate-400">Overall Score</p>
+          <div className="flex justify-center gap-6 mt-4 text-sm text-slate-500">
+            <span>{formatTime(duration)} time</span>
+            <span>{Math.ceil(messageCount / 2)} prompts</span>
           </div>
         </div>
 
-        {/* Metrics */}
-        <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 mb-8">
-          <h2 className="text-lg font-semibold text-white mb-4">Performance Breakdown</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-slate-300">Prompt Efficiency</span>
-                <span className="text-slate-400">{efficiencyScore}%</span>
-              </div>
-              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                  style={{ width: `${efficiencyScore}%` }}
-                />
-              </div>
-            </div>
+        {/* Breakdown */}
+        <div className="bg-slate-800 rounded-xl p-6 mb-6 space-y-5">
+          <h2 className="text-white font-medium mb-4">Performance Breakdown</h2>
 
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-slate-300">Time Management</span>
-                <span className="text-slate-400">{timeScore}%</span>
-              </div>
-              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-green-500 rounded-full transition-all duration-500"
-                  style={{ width: `${timeScore}%` }}
-                />
-              </div>
+          <div>
+            <div className="flex justify-between text-sm mb-1.5">
+              <span className="text-slate-300">Prompt Quality</span>
+              <span className={getScoreColor(analysis.promptQuality.score)}>
+                {analysis.promptQuality.score}%
+              </span>
             </div>
+            {getScoreBar(analysis.promptQuality.score)}
+            <p className="text-slate-500 text-xs mt-1">{analysis.promptQuality.feedback}</p>
+          </div>
+
+          <div>
+            <div className="flex justify-between text-sm mb-1.5">
+              <span className="text-slate-300">Context Provided</span>
+              <span className={getScoreColor(analysis.contextProvided.score)}>
+                {analysis.contextProvided.score}%
+              </span>
+            </div>
+            {getScoreBar(analysis.contextProvided.score)}
+            <p className="text-slate-500 text-xs mt-1">{analysis.contextProvided.feedback}</p>
+          </div>
+
+          <div>
+            <div className="flex justify-between text-sm mb-1.5">
+              <span className="text-slate-300">Iteration & Refinement</span>
+              <span className={getScoreColor(analysis.iteration.score)}>
+                {analysis.iteration.score}%
+              </span>
+            </div>
+            {getScoreBar(analysis.iteration.score)}
+            <p className="text-slate-500 text-xs mt-1">{analysis.iteration.feedback}</p>
+          </div>
+
+          <div>
+            <div className="flex justify-between text-sm mb-1.5">
+              <span className="text-slate-300">Efficiency</span>
+              <span className={getScoreColor(analysis.efficiency.score)}>
+                {analysis.efficiency.score}%
+              </span>
+            </div>
+            {getScoreBar(analysis.efficiency.score)}
+            <p className="text-slate-500 text-xs mt-1">{analysis.efficiency.feedback}</p>
           </div>
         </div>
 
-        {/* Feedback */}
-        <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6 mb-8">
-          <h3 className="text-blue-400 font-semibold mb-2">💡 Tips for Improvement</h3>
-          <ul className="text-slate-300 text-sm space-y-2">
-            {turns > 8 && (
-              <li>• Try providing more context upfront to reduce back-and-forth</li>
-            )}
-            {turns <= 4 && (
-              <li>• Great prompt efficiency! You provided clear, detailed instructions</li>
-            )}
-            {time > 600 && (
-              <li>• Practice will help you work faster with AI assistants</li>
-            )}
-            {time <= 300 && (
-              <li>• Excellent time management while maintaining quality</li>
-            )}
-            <li>• Always review AI output for accuracy before accepting</li>
-          </ul>
+        {/* Summary */}
+        <div className="bg-slate-800 rounded-xl p-6 mb-6">
+          <h2 className="text-white font-medium mb-3">Summary</h2>
+          <p className="text-slate-300 text-sm leading-relaxed">{analysis.summary}</p>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-4">
+        <div className="flex gap-3">
           <Link
             href="/"
-            className="flex-1 text-center px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-medium transition-colors"
+            className="flex-1 text-center py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors"
           >
-            Try Another Scenario
+            New Assessment
           </Link>
           <button
             onClick={() => window.print()}
-            className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-colors"
+            className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors"
           >
-            Download Results
+            Export Results
           </button>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-12 text-center text-slate-500 text-sm">
-          Powered by <span className="text-blue-400 font-medium">HireUp</span>
         </div>
       </div>
     </div>
-  );
-}
-
-export default function ResultsPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-white">Loading results...</div>
-      </div>
-    }>
-      <ResultsContent />
-    </Suspense>
   );
 }
