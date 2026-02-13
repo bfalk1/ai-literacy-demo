@@ -30,6 +30,7 @@ export default function ResultsPage() {
     try {
       // Get ATS params from URL if present
       const params = new URLSearchParams(window.location.search);
+      const companySlug = localStorage.getItem('companySlug');
       
       const response = await fetch('/api/assessments', {
         method: 'POST',
@@ -43,6 +44,7 @@ export default function ResultsPage() {
           analysis: analysisResult,
           atsJobId: params.get('jobId'),
           atsApplicationId: params.get('applicationId'),
+          companySlug,
         }),
       });
       

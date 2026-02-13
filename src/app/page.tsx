@@ -1,16 +1,40 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import Link from "next/link";
+import { getSupabase } from "@/lib/supabase";
 
-export default function Home() {
+function HomeContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [companyName, setCompanyName] = useState<string | null>(null);
+  const companySlug = searchParams.get('company');
+
+  useEffect(() => {
+    if (companySlug) {
+      localStorage.setItem("companySlug", companySlug);
+      const supabase = getSupabase();
+      if (supabase) {
+        supabase
+          .from('companies')
+          .select('name')
+          .eq('slug', companySlug)
+          .single()
+          .then(({ data }) => {
+            if (data) setCompanyName(data.name);
+          });
+      }
+    }
+  }, [companySlug]);
 
   const handleStart = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
       localStorage.setItem("candidateName", name.trim());
+      if (email.trim()) localStorage.setItem("candidateEmail", email.trim());
       router.push("/assessment");
     }
   };
@@ -25,10 +49,13 @@ export default function Home() {
       padding: '0 20px',
     }}>
       {/* Header */}
-      <header style={{ padding: '20px 0' }}>
+      <header style={{ padding: '20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a' }}>
           TELESCOPIC
         </span>
+        <Link href="/auth/login" style={{ fontSize: '13px', color: '#71717a', textDecoration: 'none' }}>
+          Company login
+        </Link>
       </header>
 
       {/* Main */}
@@ -40,6 +67,11 @@ export default function Home() {
         paddingTop: '40px',
         paddingBottom: '40px',
       }}>
+        {companyName && (
+          <p style={{ fontSize: '12px', color: '#71717a', marginBottom: '8px' }}>
+            Assessment for {companyName}
+          </p>
+        )}
         <h1 style={{ 
           fontSize: 'clamp(24px, 7vw, 32px)', 
           fontWeight: 600, 
@@ -65,7 +97,7 @@ export default function Home() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Candidate name"
+            placeholder="Your name"
             style={{
               width: '100%',
               backgroundColor: '#18181b',
@@ -79,6 +111,24 @@ export default function Home() {
               WebkitAppearance: 'none',
             }}
             required
+          />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email (optional)"
+            style={{
+              width: '100%',
+              backgroundColor: '#18181b',
+              border: '1px solid #27272a',
+              borderRadius: '12px',
+              padding: '16px',
+              fontSize: '16px',
+              color: '#fff',
+              outline: 'none',
+              marginBottom: '12px',
+              WebkitAppearance: 'none',
+            }}
           />
           <button
             type="submit"
@@ -113,5 +163,17 @@ export default function Home() {
         </p>
       </footer>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '100dvh', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: '#71717a' }}>Loading...</p>
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
   );
 }

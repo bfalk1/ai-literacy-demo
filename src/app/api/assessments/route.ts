@@ -19,11 +19,24 @@ export async function POST(request: NextRequest) {
       analysis,
       atsJobId,
       atsApplicationId,
+      companySlug,
     } = body;
+    
+    // Look up company by slug if provided
+    let companyId = null;
+    if (companySlug) {
+      const { data: company } = await supabase
+        .from('companies')
+        .select('id')
+        .eq('slug', companySlug)
+        .single();
+      if (company) companyId = company.id;
+    }
 
     const { data, error } = await supabase
       .from('assessments')
       .insert({
+        company_id: companyId,
         candidate_name: candidateName,
         candidate_email: candidateEmail || null,
         task,
