@@ -101,15 +101,23 @@ export default function AssessmentPage() {
   };
 
   return (
-    <div className="h-dvh bg-black text-white flex flex-col">
+    <div style={{
+      height: '100dvh',
+      backgroundColor: '#000',
+      color: '#fff',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+    }}>
       {/* Header */}
       <header style={{ 
         flexShrink: 0, 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'space-between',
-        padding: '16px 24px',
-        borderBottom: '1px solid #27272a'
+        padding: '12px 20px',
+        borderBottom: '1px solid #27272a',
+        minHeight: '56px',
       }}>
         <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a' }}>
           TELESCOPIC
@@ -118,14 +126,14 @@ export default function AssessmentPage() {
           <button
             onClick={handleComplete}
             style={{
-              fontSize: '12px',
+              fontSize: '13px',
               fontWeight: 600,
               padding: '8px 16px',
               backgroundColor: '#fff',
               color: '#000',
               border: 'none',
               borderRadius: '8px',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
           >
             Finish
@@ -134,7 +142,12 @@ export default function AssessmentPage() {
       </header>
 
       {/* Messages */}
-      <main style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+      <main style={{ 
+        flex: 1, 
+        overflowY: 'auto', 
+        padding: '20px',
+        WebkitOverflowScrolling: 'touch',
+      }}>
         {/* Task */}
         {messages.length === 0 && (
           <div style={{
@@ -142,7 +155,7 @@ export default function AssessmentPage() {
             border: '1px solid #27272a',
             borderRadius: '12px',
             padding: '16px',
-            marginBottom: '24px'
+            marginBottom: '20px',
           }}>
             <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a', marginBottom: '8px' }}>
               TASK
@@ -154,10 +167,10 @@ export default function AssessmentPage() {
         )}
 
         {/* Chat */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {messages.map((m) => (
             <div key={m.id}>
-              <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a', marginBottom: '8px' }}>
+              <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a', marginBottom: '6px' }}>
                 {m.role === "user" ? "YOU" : "AI"}
               </p>
               <p style={{ 
@@ -165,7 +178,8 @@ export default function AssessmentPage() {
                 lineHeight: 1.7, 
                 whiteSpace: 'pre-wrap',
                 color: m.role === "user" ? '#e4e4e7' : '#a1a1aa',
-                margin: 0
+                margin: 0,
+                wordBreak: 'break-word',
               }}>
                 {m.content}
               </p>
@@ -174,13 +188,13 @@ export default function AssessmentPage() {
 
           {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
             <div>
-              <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a', marginBottom: '8px' }}>
+              <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a', marginBottom: '6px' }}>
                 AI
               </p>
               <div style={{ display: 'flex', gap: '4px' }}>
-                <span style={{ width: '6px', height: '6px', backgroundColor: '#71717a', borderRadius: '50%' }} />
-                <span style={{ width: '6px', height: '6px', backgroundColor: '#71717a', borderRadius: '50%' }} />
-                <span style={{ width: '6px', height: '6px', backgroundColor: '#71717a', borderRadius: '50%' }} />
+                <span style={{ width: '6px', height: '6px', backgroundColor: '#71717a', borderRadius: '50%', animation: 'pulse 1s infinite' }} />
+                <span style={{ width: '6px', height: '6px', backgroundColor: '#71717a', borderRadius: '50%', animation: 'pulse 1s infinite 0.15s' }} />
+                <span style={{ width: '6px', height: '6px', backgroundColor: '#71717a', borderRadius: '50%', animation: 'pulse 1s infinite 0.3s' }} />
               </div>
             </div>
           )}
@@ -192,15 +206,19 @@ export default function AssessmentPage() {
       <footer style={{ 
         flexShrink: 0, 
         borderTop: '1px solid #27272a',
-        padding: '12px 24px',
-        paddingBottom: 'max(12px, env(safe-area-inset-bottom))'
+        padding: '12px 20px',
+        paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
+        backgroundColor: '#000',
       }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '12px', alignItems: 'flex-end' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
           <div style={{ 
             flex: 1, 
             backgroundColor: '#18181b', 
             borderRadius: '12px',
-            border: '1px solid #27272a'
+            border: '1px solid #27272a',
+            minHeight: '48px',
+            display: 'flex',
+            alignItems: 'center',
           }}>
             <textarea
               ref={inputRef}
@@ -213,12 +231,13 @@ export default function AssessmentPage() {
                 width: '100%',
                 backgroundColor: 'transparent',
                 border: 'none',
-                padding: '12px 16px',
-                fontSize: '14px',
+                padding: '14px 16px',
+                fontSize: '16px',
                 color: '#fff',
                 resize: 'none',
                 outline: 'none',
-                fontFamily: 'inherit'
+                fontFamily: 'inherit',
+                lineHeight: 1.4,
               }}
               disabled={isLoading}
             />
@@ -227,7 +246,7 @@ export default function AssessmentPage() {
             type="submit"
             disabled={isLoading || !input.trim()}
             style={{
-              padding: '12px 20px',
+              padding: '14px 18px',
               backgroundColor: '#fff',
               color: '#000',
               fontSize: '14px',
@@ -235,7 +254,8 @@ export default function AssessmentPage() {
               border: 'none',
               borderRadius: '12px',
               cursor: 'pointer',
-              opacity: (isLoading || !input.trim()) ? 0.3 : 1
+              opacity: (isLoading || !input.trim()) ? 0.3 : 1,
+              flexShrink: 0,
             }}
           >
             Send

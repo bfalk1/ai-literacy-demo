@@ -36,18 +36,18 @@ export default function ResultsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-dvh bg-black flex items-center justify-center px-5">
-        <p className="text-zinc-500 text-sm">Analyzing...</p>
+      <div style={{ minHeight: '100dvh', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <p style={{ color: '#71717a', fontSize: '14px' }}>Analyzing...</p>
       </div>
     );
   }
 
   if (!analysis) {
     return (
-      <div className="min-h-dvh bg-black flex items-center justify-center px-5">
-        <div className="text-center">
-          <p className="text-zinc-500 text-sm mb-4">No data found</p>
-          <Link href="/" className="text-zinc-400 text-sm hover:text-white">Start over →</Link>
+      <div style={{ minHeight: '100dvh', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ color: '#71717a', fontSize: '14px', marginBottom: '16px' }}>No data found</p>
+          <Link href="/" style={{ color: '#a1a1aa', fontSize: '14px', textDecoration: 'none' }}>Start over →</Link>
         </div>
       </div>
     );
@@ -61,60 +61,87 @@ export default function ResultsPage() {
   ];
 
   return (
-    <div className="min-h-dvh bg-black text-white">
+    <div style={{ minHeight: '100dvh', backgroundColor: '#000', color: '#fff' }}>
       {/* Header */}
-      <header className="px-5 py-4 border-b border-zinc-800">
-        <span className="text-xs font-semibold tracking-widest text-zinc-500">TELESCOPIC</span>
+      <header style={{ padding: '16px 20px', borderBottom: '1px solid #27272a' }}>
+        <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a' }}>TELESCOPIC</span>
       </header>
 
       {/* Content */}
-      <main className="px-5 py-8 max-w-lg mx-auto">
+      <main style={{ padding: '24px 20px', maxWidth: '500px', margin: '0 auto' }}>
         {/* Score */}
-        <div className="mb-10">
-          <p className="text-xs font-semibold tracking-widest text-zinc-500 mb-1">{candidateName}</p>
-          <div className="flex items-baseline gap-3">
-            <span className="text-6xl font-semibold tabular-nums">{analysis.score}</span>
-            <span className="text-xl text-zinc-600">/100</span>
+        <div style={{ marginBottom: '32px' }}>
+          <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a', marginBottom: '4px' }}>
+            {candidateName}
+          </p>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+            <span style={{ fontSize: 'clamp(48px, 15vw, 64px)', fontWeight: 600, lineHeight: 1 }}>{analysis.score}</span>
+            <span style={{ fontSize: '20px', color: '#52525b' }}>/100</span>
           </div>
-          <div className="flex gap-4 mt-3 text-xs text-zinc-500">
+          <div style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '13px', color: '#71717a' }}>
             <span>{formatTime(duration)}</span>
             <span>{Math.ceil(messageCount / 2)} prompts</span>
           </div>
         </div>
 
         {/* Metrics */}
-        <div className="space-y-6 mb-10">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '32px' }}>
           {metrics.map((m) => (
             <div key={m.label}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-zinc-400">{m.label}</span>
-                <span className="text-sm font-medium tabular-nums">{m.value.score}</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontSize: '14px', color: '#a1a1aa' }}>{m.label}</span>
+                <span style={{ fontSize: '14px', fontWeight: 500 }}>{m.value.score}</span>
               </div>
-              <div className="h-1 bg-zinc-900 rounded-full overflow-hidden mb-2">
-                <div className="h-full bg-zinc-500 rounded-full" style={{ width: `${m.value.score}%` }} />
+              <div style={{ height: '4px', backgroundColor: '#27272a', borderRadius: '2px', overflow: 'hidden', marginBottom: '8px' }}>
+                <div style={{ height: '100%', backgroundColor: '#71717a', borderRadius: '2px', width: `${m.value.score}%` }} />
               </div>
-              <p className="text-xs text-zinc-600">{m.value.feedback}</p>
+              <p style={{ fontSize: '12px', color: '#52525b', lineHeight: 1.5, margin: 0 }}>{m.value.feedback}</p>
             </div>
           ))}
         </div>
 
         {/* Summary */}
-        <div className="mb-10">
-          <p className="text-xs font-semibold tracking-widest text-zinc-500 mb-3">SUMMARY</p>
-          <p className="text-sm text-zinc-400 leading-relaxed">{analysis.summary}</p>
+        <div style={{ marginBottom: '32px' }}>
+          <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a', marginBottom: '12px' }}>SUMMARY</p>
+          <p style={{ fontSize: '14px', color: '#a1a1aa', lineHeight: 1.6, margin: 0 }}>{analysis.summary}</p>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 pb-safe">
+        <div style={{ 
+          display: 'flex', 
+          gap: '12px',
+          paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
+        }}>
           <Link
             href="/"
-            className="flex-1 py-3.5 text-center text-sm font-medium text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-xl"
+            style={{
+              flex: 1,
+              padding: '14px',
+              textAlign: 'center',
+              fontSize: '14px',
+              fontWeight: 500,
+              color: '#a1a1aa',
+              backgroundColor: '#18181b',
+              border: '1px solid #27272a',
+              borderRadius: '12px',
+              textDecoration: 'none',
+            }}
           >
             New assessment
           </Link>
           <button
             onClick={() => window.print()}
-            className="flex-1 py-3.5 text-sm font-semibold bg-white text-black rounded-xl"
+            style={{
+              flex: 1,
+              padding: '14px',
+              fontSize: '14px',
+              fontWeight: 600,
+              backgroundColor: '#fff',
+              color: '#000',
+              border: 'none',
+              borderRadius: '12px',
+              cursor: 'pointer',
+            }}
           >
             Export
           </button>

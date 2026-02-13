@@ -6,27 +6,25 @@
   padding: 0;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 html, body {
   background: #000;
   color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Force padding on all pages */
-.page-container {
-  padding-left: 24px;
-  padding-right: 24px;
+/* Prevent zoom on input focus on iOS */
+input, textarea, select {
+  font-size: 16px;
 }
 
-/* Safe area */
-.pb-safe {
-  padding-bottom: max(20px, env(safe-area-inset-bottom));
-}
-
-/* Dynamic viewport */
-.min-h-dvh {
-  min-height: 100dvh;
-}
-
-.h-dvh {
-  height: 100dvh;
+/* Pulse animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
