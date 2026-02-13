@@ -174,7 +174,7 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
       </main>
 
       <footer style={{ padding: '20px 0', paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}>
-        <p style={{ fontSize: '12px', color: '#3f3f46' }}>Powered by HireUp</p>
+        <p style={{ fontSize: '12px', color: '#3f3f46' }}>Powered by Telescopic</p>
       </footer>
     </div>
   );

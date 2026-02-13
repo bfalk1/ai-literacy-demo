@@ -73,7 +73,7 @@ export default function Home() {
         paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
       }}>
         <p style={{ fontSize: '12px', color: '#3f3f46' }}>
-          Powered by HireUp
+          Powered by Telescopic
         </p>
       </footer>
     </div>
