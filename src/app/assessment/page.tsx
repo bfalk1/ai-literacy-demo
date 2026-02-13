@@ -39,7 +39,7 @@ export default function AssessmentPage() {
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.style.height = "auto";
-      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 200) + "px";
+      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 120) + "px";
     }
   }, [input]);
 
@@ -101,14 +101,14 @@ export default function AssessmentPage() {
   };
 
   return (
-    <div className="h-screen bg-black text-white flex flex-col">
+    <div className="h-[100dvh] bg-black text-white flex flex-col">
       {/* Header */}
-      <header className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-white/5">
-        <div className="text-sm font-medium tracking-wide text-white/50">TELESCOPIC</div>
+      <header className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 h-14 border-b border-white/10">
+        <div className="text-xs font-semibold tracking-widest text-white/40">TELESCOPIC</div>
         {messages.length >= 2 && (
           <button
             onClick={handleComplete}
-            className="text-sm font-medium px-4 py-2 bg-white text-black rounded-lg hover:bg-white/90 transition-colors"
+            className="text-xs font-semibold px-3 py-1.5 bg-white text-black rounded-md"
           >
             Finish
           </button>
@@ -117,23 +117,23 @@ export default function AssessmentPage() {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-6 py-8">
+        <div className="max-w-xl mx-auto px-4 sm:px-6 py-6">
           {/* Task */}
           {messages.length === 0 && (
-            <div className="mb-12">
-              <div className="inline-block text-xs font-medium tracking-wide text-white/30 uppercase mb-4">Your task</div>
-              <p className="text-xl text-white/70 leading-relaxed">{TASK}</p>
+            <div className="rounded-lg bg-white/[0.03] border border-white/10 p-4 mb-6">
+              <div className="text-[10px] font-semibold tracking-widest text-white/40 uppercase mb-2">Task</div>
+              <p className="text-sm sm:text-base text-white/70 leading-relaxed">{TASK}</p>
             </div>
           )}
 
           {/* Chat */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {messages.map((m) => (
               <div key={m.id}>
-                <div className="text-xs font-medium tracking-wide text-white/30 uppercase mb-3">
+                <div className="text-[10px] font-semibold tracking-widest text-white/40 uppercase mb-2">
                   {m.role === "user" ? "You" : "AI"}
                 </div>
-                <div className={`text-base leading-relaxed whitespace-pre-wrap ${m.role === "user" ? "text-white" : "text-white/70"}`}>
+                <div className={`text-sm leading-relaxed whitespace-pre-wrap ${m.role === "user" ? "text-white/90" : "text-white/60"}`}>
                   {m.content}
                 </div>
               </div>
@@ -141,11 +141,11 @@ export default function AssessmentPage() {
 
             {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
               <div>
-                <div className="text-xs font-medium tracking-wide text-white/30 uppercase mb-3">AI</div>
+                <div className="text-[10px] font-semibold tracking-widest text-white/40 uppercase mb-2">AI</div>
                 <div className="flex gap-1">
-                  <span className="w-2 h-2 bg-white/30 rounded-full animate-pulse" />
-                  <span className="w-2 h-2 bg-white/30 rounded-full animate-pulse [animation-delay:150ms]" />
-                  <span className="w-2 h-2 bg-white/30 rounded-full animate-pulse [animation-delay:300ms]" />
+                  <span className="w-1.5 h-1.5 bg-white/40 rounded-full animate-pulse" />
+                  <span className="w-1.5 h-1.5 bg-white/40 rounded-full animate-pulse [animation-delay:150ms]" />
+                  <span className="w-1.5 h-1.5 bg-white/40 rounded-full animate-pulse [animation-delay:300ms]" />
                 </div>
               </div>
             )}
@@ -155,25 +155,25 @@ export default function AssessmentPage() {
       </div>
 
       {/* Input */}
-      <div className="flex-shrink-0 border-t border-white/5">
-        <div className="max-w-2xl mx-auto px-6 py-4">
-          <form onSubmit={handleSubmit} className="flex gap-3 items-end">
-            <div className="flex-1 bg-white/5 rounded-xl overflow-hidden">
+      <div className="flex-shrink-0 border-t border-white/10 bg-black">
+        <div className="max-w-xl mx-auto px-4 sm:px-6 py-3">
+          <form onSubmit={handleSubmit} className="flex gap-2 items-end">
+            <div className="flex-1 bg-white/5 rounded-lg border border-white/10">
               <textarea
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Send a message..."
+                placeholder="Message..."
                 rows={1}
-                className="w-full bg-transparent px-4 py-3 text-white placeholder-white/30 resize-none focus:outline-none"
+                className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-white/30 resize-none focus:outline-none"
                 disabled={isLoading}
               />
             </div>
             <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="px-5 py-3 bg-white text-black text-sm font-medium rounded-xl hover:bg-white/90 disabled:opacity-30 transition-all"
+              className="px-4 py-2.5 bg-white text-black text-xs font-semibold rounded-lg disabled:opacity-30"
             >
               Send
             </button>
