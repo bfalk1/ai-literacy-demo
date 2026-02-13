@@ -60,7 +60,7 @@ export default function Home() {
           Measure how effectively candidates work with AI tools.
         </p>
 
-        <form onSubmit={handleStart} style={{ width: '100%', maxWidth: '400px' }}>
+        <form onSubmit={handleStart} style={{ width: '100%', maxWidth: 'min(400px, 100%)' }}>
           <input
             type="text"
             value={name}
