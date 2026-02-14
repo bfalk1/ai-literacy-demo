@@ -1,0 +1,158 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@/lib/supabase';
+import { verifyAshbyWebhook, AshbyWebhookPayload } from '@/lib/ashby';
+import crypto from 'crypto';
+
+/**
+ * Ashby Webhook Handler
+ * 
+ * Set up in Ashby:
+ * Admin > Integrations > Webhooks > Add Webhook
+ * 
+ * Events to subscribe:
+ * - applicationStageChanged
+ * - candidateHired
+ * - candidateArchived
+ * 
+ * Endpoint URL: https://your-domain.com/api/integrations/ashby/webhook?company_id=xxx
+ */
+
+export async function POST(request: NextRequest) {
+  const supabase = createServerClient();
+  if (!supabase) {
+    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+  }
+
+  try {
+    // Get company ID from query params
+    const { searchParams } = new URL(request.url);
+    const companyId = searchParams.get('company_id');
+
+    if (!companyId) {
+      return NextResponse.json({ error: 'company_id required' }, { status: 400 });
+    }
+
+    // Get company's Ashby settings
+    const { data: company } = await supabase
+      .from('companies')
+      .select('id, ashby_secret_key, ashby_trigger_stage')
+      .eq('id', companyId)
+      .single();
+
+    if (!company) {
+      return NextResponse.json({ error: 'Company not found' }, { status: 404 });
+    }
+
+    // Get raw body for signature verification
+    const rawBody = await request.text();
+    
+    // Verify webhook signature if secret key is configured
+    if (company.ashby_secret_key) {
+      const signature = request.headers.get('x-ashby-signature') || 
+                        request.headers.get('signature') || '';
+      
+      if (!verifyAshbyWebhook(signature, rawBody, company.ashby_secret_key)) {
+        console.error('Ashby webhook signature verification failed');
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      }
+    }
+
+    // Parse the webhook event
+    const event: AshbyWebhookPayload = JSON.parse(rawBody);
+    
+    console.log('Ashby webhook received:', event.eventType);
+
+    // Handle different event types
+    switch (event.eventType) {
+      case 'applicationStageChanged':
+        await handleStageChange(supabase, company, event);
+        break;
+      
+      case 'candidateHired':
+        // Could track this for analytics
+        console.log('Candidate hired:', event.data.candidate?.id);
+        break;
+
+      case 'candidateArchived':
+        console.log('Candidate archived:', event.data.candidate?.id);
+        break;
+
+      default:
+        console.log('Unhandled webhook event:', event.eventType);
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Ashby webhook error:', error);
+    return NextResponse.json(
+      { error: 'Webhook processing failed' },
+      { status: 500 }
+    );
+  }
+}
+
+async function handleStageChange(
+  supabase: ReturnType<typeof createServerClient>,
+  company: { id: string; ashby_trigger_stage?: string },
+  event: AshbyWebhookPayload
+) {
+  const application = event.data.application;
+  const candidate = event.data.candidate;
+
+  if (!application || !candidate) {
+    console.log('Missing application or candidate data');
+    return;
+  }
+
+  // Check if the stage matches our trigger stage
+  const currentStageName = application.currentInterviewStage?.name?.toLowerCase() || '';
+  const triggerStage = company.ashby_trigger_stage?.toLowerCase() || 'assessment';
+
+  if (!currentStageName.includes(triggerStage)) {
+    console.log(`Stage "${currentStageName}" doesn't match trigger "${triggerStage}"`);
+    return;
+  }
+
+  // Get candidate email
+  const email = candidate.primaryEmailAddress?.value;
+  if (!email) {
+    console.error('No email found for candidate');
+    return;
+  }
+
+  // Generate invitation token
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000); // 72 hours
+
+  // Create invitation in Supabase
+  const { data: invitation, error } = await supabase!
+    .from('invitations')
+    .insert({
+      company_id: company.id,
+      token,
+      candidate_email: email,
+      candidate_name: candidate.name || '',
+      expires_at: expiresAt.toISOString(),
+      ats_provider: 'ashby',
+      ats_job_id: application.jobId,
+      ats_application_id: application.id,
+      ats_candidate_id: candidate.id,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Failed to create invitation:', error);
+    return;
+  }
+
+  console.log('Created invitation for', email, 'token:', token);
+
+  // TODO: Send email to candidate with assessment link
+  // Email integration would go here (SendGrid, Resend, etc.)
+}
+
+// Handle GET for webhook verification
+export async function GET(request: NextRequest) {
+  return NextResponse.json({ status: 'ok', service: 'Telescopic Ashby Integration' });
+}
