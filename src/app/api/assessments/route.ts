@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { AshbyClient } from '@/lib/ashby';
 import { GreenhouseClient } from '@/lib/greenhouse';
+import { LeverClient } from '@/lib/lever';
 
 export async function POST(request: NextRequest) {
   try {
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
         // Fetch company settings for ATS API keys
         const { data: company } = await supabase
           .from('companies')
-          .select('ashby_api_key, greenhouse_api_key')
+          .select('ashby_api_key, greenhouse_api_key, lever_api_key')
           .eq('id', invitation.company_id)
           .single();
         
@@ -113,6 +114,23 @@ export async function POST(request: NextRequest) {
             duration: duration,
           });
           console.log('Pushed assessment results to Greenhouse for candidate:', invitation.ats_candidate_id);
+        }
+
+        if (invitation.ats_provider === 'lever' && company?.lever_api_key) {
+          const lever = new LeverClient({ apiKey: company.lever_api_key });
+          // For Lever, ats_application_id is the opportunityId
+          await lever.pushAssessmentResults(invitation.ats_application_id, {
+            candidateName: candidateName,
+            overallScore: analysis.score,
+            promptQualityScore: analysis.promptQuality.score,
+            contextScore: analysis.contextProvided.score,
+            iterationScore: analysis.iteration.score,
+            efficiencyScore: analysis.efficiency.score,
+            summary: analysis.summary,
+            assessmentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/results/${data.id}`,
+            duration: duration,
+          });
+          console.log('Pushed assessment results to Lever for opportunity:', invitation.ats_application_id);
         }
       } catch (atsError) {
         console.error('Failed to push results to ATS:', atsError);

@@ -65,6 +65,12 @@ export default function DocsLayout({
                   >
                     Greenhouse
                   </Link>
+                  <Link 
+                    href="/docs/integrations/lever" 
+                    className="block px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-md transition-colors"
+                  >
+                    Lever
+                  </Link>
                 </div>
               </div>
             </nav>

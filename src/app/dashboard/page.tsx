@@ -336,16 +336,24 @@ export default function DashboardPage() {
               </code>
             </div>
 
-            <div style={{ backgroundColor: '#18181b', borderRadius: '8px', padding: '16px' }}>
+            <div style={{ backgroundColor: '#18181b', borderRadius: '8px', padding: '16px', marginBottom: '12px' }}>
               <p style={{ fontSize: '13px', color: '#a1a1aa', marginBottom: '8px' }}>Greenhouse Webhook URL</p>
               <code style={{ fontSize: '12px', color: '#a1a1aa', backgroundColor: '#0a0a0a', padding: '8px 12px', borderRadius: '6px', display: 'block', wordBreak: 'break-all' }}>
                 {typeof window !== 'undefined' ? window.location.origin : ''}/api/integrations/greenhouse/webhook?company_id={company?.id}
               </code>
             </div>
 
+            <div style={{ backgroundColor: '#18181b', borderRadius: '8px', padding: '16px' }}>
+              <p style={{ fontSize: '13px', color: '#a1a1aa', marginBottom: '8px' }}>Lever Webhook URL</p>
+              <code style={{ fontSize: '12px', color: '#a1a1aa', backgroundColor: '#0a0a0a', padding: '8px 12px', borderRadius: '6px', display: 'block', wordBreak: 'break-all' }}>
+                {typeof window !== 'undefined' ? window.location.origin : ''}/api/integrations/lever/webhook?company_id={company?.id}
+              </code>
+            </div>
+
             <p style={{ fontSize: '12px', color: '#52525b', marginTop: '16px' }}>
-              See <Link href="/docs/integrations/ashby" style={{ color: '#a1a1aa', textDecoration: 'underline' }}>Ashby docs</Link> or{' '}
-              <Link href="/docs/integrations/greenhouse" style={{ color: '#a1a1aa', textDecoration: 'underline' }}>Greenhouse docs</Link> for setup instructions.
+              See <Link href="/docs/integrations/ashby" style={{ color: '#a1a1aa', textDecoration: 'underline' }}>Ashby</Link>,{' '}
+              <Link href="/docs/integrations/greenhouse" style={{ color: '#a1a1aa', textDecoration: 'underline' }}>Greenhouse</Link>, or{' '}
+              <Link href="/docs/integrations/lever" style={{ color: '#a1a1aa', textDecoration: 'underline' }}>Lever</Link> docs for setup instructions.
             </p>
           </>
         )}

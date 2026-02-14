@@ -53,6 +53,16 @@ export default function DocsPage() {
             Automatic assessment triggers and result syncing with Greenhouse.
           </p>
         </Link>
+
+        <Link 
+          href="/docs/integrations/lever"
+          className="block p-5 bg-zinc-900 rounded-lg border border-zinc-800 hover:border-zinc-700 transition-colors"
+        >
+          <h3 className="text-base font-semibold mb-2">Lever</h3>
+          <p className="text-sm text-zinc-500">
+            Automatic assessment triggers and result syncing with Lever.
+          </p>
+        </Link>
       </div>
 
       <h2 className="text-lg font-semibold mb-4">What We Measure</h2>
