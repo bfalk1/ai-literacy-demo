@@ -318,10 +318,35 @@ export default function DashboardPage() {
             <div style={{ backgroundColor: '#18181b', borderRadius: '8px', padding: '16px' }}>
               <p style={{ fontSize: '14px', color: '#a1a1aa' }}>Company: {company?.name}</p>
               <p style={{ fontSize: '14px', color: '#71717a', marginTop: '8px' }}>Slug: {company?.slug}</p>
+              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #27272a' }}>
+                <p style={{ fontSize: '12px', color: '#71717a', marginBottom: '4px' }}>Company ID</p>
+                <code style={{ fontSize: '13px', color: '#fff', backgroundColor: '#0a0a0a', padding: '8px 12px', borderRadius: '6px', display: 'block', wordBreak: 'break-all' }}>
+                  {company?.id}
+                </code>
+              </div>
             </div>
 
-            <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', marginTop: '32px' }}>Webhooks</h2>
-            <p style={{ fontSize: '14px', color: '#52525b' }}>Coming soon — configure webhooks to push results to your ATS.</p>
+            <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', marginTop: '32px' }}>Webhook URLs</h2>
+            <p style={{ fontSize: '13px', color: '#71717a', marginBottom: '16px' }}>Use these URLs to connect your ATS to Telescopic.</p>
+            
+            <div style={{ backgroundColor: '#18181b', borderRadius: '8px', padding: '16px', marginBottom: '12px' }}>
+              <p style={{ fontSize: '13px', color: '#a1a1aa', marginBottom: '8px' }}>Ashby Webhook URL</p>
+              <code style={{ fontSize: '12px', color: '#a1a1aa', backgroundColor: '#0a0a0a', padding: '8px 12px', borderRadius: '6px', display: 'block', wordBreak: 'break-all' }}>
+                {typeof window !== 'undefined' ? window.location.origin : ''}/api/integrations/ashby/webhook?company_id={company?.id}
+              </code>
+            </div>
+
+            <div style={{ backgroundColor: '#18181b', borderRadius: '8px', padding: '16px' }}>
+              <p style={{ fontSize: '13px', color: '#a1a1aa', marginBottom: '8px' }}>Greenhouse Webhook URL</p>
+              <code style={{ fontSize: '12px', color: '#a1a1aa', backgroundColor: '#0a0a0a', padding: '8px 12px', borderRadius: '6px', display: 'block', wordBreak: 'break-all' }}>
+                {typeof window !== 'undefined' ? window.location.origin : ''}/api/integrations/greenhouse/webhook?company_id={company?.id}
+              </code>
+            </div>
+
+            <p style={{ fontSize: '12px', color: '#52525b', marginTop: '16px' }}>
+              See <Link href="/docs/integrations/ashby" style={{ color: '#a1a1aa', textDecoration: 'underline' }}>Ashby docs</Link> or{' '}
+              <Link href="/docs/integrations/greenhouse" style={{ color: '#a1a1aa', textDecoration: 'underline' }}>Greenhouse docs</Link> for setup instructions.
+            </p>
           </>
         )}
       </main>

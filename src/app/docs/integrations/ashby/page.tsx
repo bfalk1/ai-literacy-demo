@@ -36,22 +36,26 @@ export default function AshbyDocsPage() {
         </li>
       </ol>
 
-      <div className="bg-zinc-900 rounded-lg p-4 mb-4 overflow-x-auto">
+      <div className="bg-zinc-900 rounded-lg p-4 mb-4">
+        <p className="text-zinc-500 text-sm mb-2">Your webhook URL:</p>
         <code className="text-sm text-zinc-300 break-all">
-          https://telescopic.ca/api/integrations/ashby/webhook?company_id=YOUR_COMPANY_ID
+          https://telescopic.ca/api/integrations/ashby/webhook?company_id=<span className="text-indigo-400">YOUR_COMPANY_ID</span>
         </code>
+      </div>
+
+      <div className="bg-zinc-800 rounded-lg p-4 mb-4">
+        <p className="text-zinc-400 text-sm mb-2">To find your Company ID:</p>
+        <ol className="list-decimal list-inside space-y-1 text-zinc-400 text-sm">
+          <li>Go to your <a href="/dashboard" className="text-white hover:underline">Telescopic Dashboard</a></li>
+          <li>Navigate to <span className="text-white">Settings</span> tab</li>
+          <li>Copy your <span className="text-white">Company ID</span></li>
+        </ol>
       </div>
 
       <ol className="list-decimal list-inside space-y-3 text-zinc-400 mb-8" start={4}>
         <li>Check <span className="text-white">Enabled</span></li>
         <li>Click <span className="text-white">Create Webhook</span></li>
       </ol>
-
-      <div className="bg-amber-950/50 border border-amber-900 rounded-lg px-4 py-3 mb-8">
-        <p className="text-amber-300 text-sm">
-          💡 Find your Company ID in your Telescopic dashboard under Settings → API
-        </p>
-      </div>
 
       <h2 className="text-lg font-semibold mb-4 mt-10">Step 2: Create an Assessment Stage</h2>
       <p className="text-zinc-400 mb-4">
