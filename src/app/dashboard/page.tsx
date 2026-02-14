@@ -9,6 +9,12 @@ interface Company {
   id: string;
   name: string;
   slug: string;
+  ashby_enabled?: boolean;
+  ashby_api_key?: string;
+  greenhouse_enabled?: boolean;
+  greenhouse_api_key?: string;
+  lever_enabled?: boolean;
+  lever_api_key?: string;
 }
 
 interface Assessment {
@@ -34,9 +40,12 @@ export default function DashboardPage() {
   const [company, setCompany] = useState<Company | null>(null);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
-  const [activeTab, setActiveTab] = useState<'assessments' | 'api' | 'settings'>('assessments');
+  const [activeTab, setActiveTab] = useState<'assessments' | 'integrations' | 'api' | 'settings'>('assessments');
   const [newKeyName, setNewKeyName] = useState("");
   const [newKey, setNewKey] = useState<string | null>(null);
+  const [editingIntegration, setEditingIntegration] = useState<'ashby' | 'greenhouse' | 'lever' | null>(null);
+  const [integrationApiKey, setIntegrationApiKey] = useState("");
+  const [savingIntegration, setSavingIntegration] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -58,10 +67,10 @@ export default function DashboardPage() {
       return;
     }
 
-    // Load company
+    // Load company with integration settings
     const { data: companyData, error: companyError } = await supabase
       .from('companies')
-      .select('*')
+      .select('id, name, slug, ashby_enabled, ashby_api_key, greenhouse_enabled, greenhouse_api_key, lever_enabled, lever_api_key')
       .eq('owner_id', user.id)
       .single();
 
@@ -137,6 +146,46 @@ export default function DashboardPage() {
     loadData();
   };
 
+  const saveIntegration = async (provider: 'ashby' | 'greenhouse' | 'lever') => {
+    if (!company) return;
+    setSavingIntegration(true);
+
+    const supabase = getSupabase();
+    if (!supabase) return;
+
+    const updates: Record<string, unknown> = {};
+    updates[`${provider}_api_key`] = integrationApiKey || null;
+    updates[`${provider}_enabled`] = !!integrationApiKey;
+
+    await supabase
+      .from('companies')
+      .update(updates)
+      .eq('id', company.id);
+
+    setSavingIntegration(false);
+    setEditingIntegration(null);
+    setIntegrationApiKey("");
+    loadData();
+  };
+
+  const disconnectIntegration = async (provider: 'ashby' | 'greenhouse' | 'lever') => {
+    if (!company) return;
+
+    const supabase = getSupabase();
+    if (!supabase) return;
+
+    const updates: Record<string, unknown> = {};
+    updates[`${provider}_api_key`] = null;
+    updates[`${provider}_enabled`] = false;
+
+    await supabase
+      .from('companies')
+      .update(updates)
+      .eq('id', company.id);
+
+    loadData();
+  };
+
   const handleLogout = async () => {
     const supabase = getSupabase();
     if (supabase) {
@@ -173,7 +222,7 @@ export default function DashboardPage() {
 
       {/* Tabs */}
       <nav style={{ padding: '0 20px', borderBottom: '1px solid #27272a', display: 'flex', gap: '24px' }}>
-        {(['assessments', 'api', 'settings'] as const).map(tab => (
+        {(['assessments', 'integrations', 'api', 'settings'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -189,7 +238,7 @@ export default function DashboardPage() {
               textTransform: 'capitalize',
             }}
           >
-            {tab === 'api' ? 'API Keys' : tab}
+            {tab === 'api' ? 'API Keys' : tab === 'integrations' ? 'Integrations' : tab}
           </button>
         ))}
       </nav>
@@ -224,6 +273,186 @@ export default function DashboardPage() {
                     <div style={{ fontSize: '24px', fontWeight: 600 }}>{a.overall_score}</div>
                   </div>
                 ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'integrations' && (
+          <>
+            <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>ATS Integrations</h2>
+            <p style={{ fontSize: '13px', color: '#71717a', marginBottom: '24px' }}>
+              Connect your ATS to automatically trigger assessments when candidates reach a specific stage.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {/* Ashby */}
+              <div style={{ backgroundColor: '#18181b', borderRadius: '8px', padding: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: company?.ashby_enabled ? '16px' : '0' }}>
+                  <div>
+                    <p style={{ fontSize: '14px', fontWeight: 500 }}>Ashby</p>
+                    <p style={{ fontSize: '12px', color: company?.ashby_enabled ? '#22c55e' : '#71717a' }}>
+                      {company?.ashby_enabled ? '✓ Connected' : 'Not connected'}
+                    </p>
+                  </div>
+                  {company?.ashby_enabled ? (
+                    <button
+                      onClick={() => disconnectIntegration('ashby')}
+                      style={{ fontSize: '13px', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                      Disconnect
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => { setEditingIntegration('ashby'); setIntegrationApiKey(''); }}
+                      style={{ fontSize: '13px', color: '#fff', backgroundColor: '#27272a', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}
+                    >
+                      Connect
+                    </button>
+                  )}
+                </div>
+                {company?.ashby_enabled && (
+                  <div>
+                    <p style={{ fontSize: '12px', color: '#71717a', marginBottom: '4px' }}>Webhook URL</p>
+                    <code style={{ fontSize: '11px', color: '#a1a1aa', backgroundColor: '#0a0a0a', padding: '8px', borderRadius: '4px', display: 'block', wordBreak: 'break-all' }}>
+                      {typeof window !== 'undefined' ? window.location.origin : ''}/api/integrations/ashby/webhook?company_id={company?.id}
+                    </code>
+                    <p style={{ fontSize: '11px', color: '#52525b', marginTop: '8px' }}>
+                      <Link href="/docs/integrations/ashby" style={{ color: '#a1a1aa', textDecoration: 'underline' }}>View setup guide →</Link>
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Greenhouse */}
+              <div style={{ backgroundColor: '#18181b', borderRadius: '8px', padding: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: company?.greenhouse_enabled ? '16px' : '0' }}>
+                  <div>
+                    <p style={{ fontSize: '14px', fontWeight: 500 }}>Greenhouse</p>
+                    <p style={{ fontSize: '12px', color: company?.greenhouse_enabled ? '#22c55e' : '#71717a' }}>
+                      {company?.greenhouse_enabled ? '✓ Connected' : 'Not connected'}
+                    </p>
+                  </div>
+                  {company?.greenhouse_enabled ? (
+                    <button
+                      onClick={() => disconnectIntegration('greenhouse')}
+                      style={{ fontSize: '13px', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                      Disconnect
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => { setEditingIntegration('greenhouse'); setIntegrationApiKey(''); }}
+                      style={{ fontSize: '13px', color: '#fff', backgroundColor: '#27272a', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}
+                    >
+                      Connect
+                    </button>
+                  )}
+                </div>
+                {company?.greenhouse_enabled && (
+                  <div>
+                    <p style={{ fontSize: '12px', color: '#71717a', marginBottom: '4px' }}>Webhook URL</p>
+                    <code style={{ fontSize: '11px', color: '#a1a1aa', backgroundColor: '#0a0a0a', padding: '8px', borderRadius: '4px', display: 'block', wordBreak: 'break-all' }}>
+                      {typeof window !== 'undefined' ? window.location.origin : ''}/api/integrations/greenhouse/webhook?company_id={company?.id}
+                    </code>
+                    <p style={{ fontSize: '11px', color: '#52525b', marginTop: '8px' }}>
+                      <Link href="/docs/integrations/greenhouse" style={{ color: '#a1a1aa', textDecoration: 'underline' }}>View setup guide →</Link>
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Lever */}
+              <div style={{ backgroundColor: '#18181b', borderRadius: '8px', padding: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: company?.lever_enabled ? '16px' : '0' }}>
+                  <div>
+                    <p style={{ fontSize: '14px', fontWeight: 500 }}>Lever</p>
+                    <p style={{ fontSize: '12px', color: company?.lever_enabled ? '#22c55e' : '#71717a' }}>
+                      {company?.lever_enabled ? '✓ Connected' : 'Not connected'}
+                    </p>
+                  </div>
+                  {company?.lever_enabled ? (
+                    <button
+                      onClick={() => disconnectIntegration('lever')}
+                      style={{ fontSize: '13px', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                      Disconnect
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => { setEditingIntegration('lever'); setIntegrationApiKey(''); }}
+                      style={{ fontSize: '13px', color: '#fff', backgroundColor: '#27272a', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}
+                    >
+                      Connect
+                    </button>
+                  )}
+                </div>
+                {company?.lever_enabled && (
+                  <div>
+                    <p style={{ fontSize: '12px', color: '#71717a', marginBottom: '4px' }}>Webhook URL</p>
+                    <code style={{ fontSize: '11px', color: '#a1a1aa', backgroundColor: '#0a0a0a', padding: '8px', borderRadius: '4px', display: 'block', wordBreak: 'break-all' }}>
+                      {typeof window !== 'undefined' ? window.location.origin : ''}/api/integrations/lever/webhook?company_id={company?.id}
+                    </code>
+                    <p style={{ fontSize: '11px', color: '#52525b', marginTop: '8px' }}>
+                      <Link href="/docs/integrations/lever" style={{ color: '#a1a1aa', textDecoration: 'underline' }}>View setup guide →</Link>
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Connect Modal */}
+            {editingIntegration && (
+              <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+                <div style={{ backgroundColor: '#18181b', borderRadius: '12px', padding: '24px', maxWidth: '400px', width: '100%', margin: '20px' }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>
+                    Connect {editingIntegration.charAt(0).toUpperCase() + editingIntegration.slice(1)}
+                  </h3>
+                  <p style={{ fontSize: '13px', color: '#71717a', marginBottom: '16px' }}>
+                    Enter your {editingIntegration.charAt(0).toUpperCase() + editingIntegration.slice(1)} API key to enable the integration.
+                  </p>
+                  <input
+                    type="password"
+                    value={integrationApiKey}
+                    onChange={(e) => setIntegrationApiKey(e.target.value)}
+                    placeholder="Paste API key here"
+                    style={{
+                      width: '100%',
+                      backgroundColor: '#0a0a0a',
+                      border: '1px solid #27272a',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      fontSize: '14px',
+                      color: '#fff',
+                      outline: 'none',
+                      marginBottom: '16px',
+                    }}
+                  />
+                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                    <button
+                      onClick={() => { setEditingIntegration(null); setIntegrationApiKey(''); }}
+                      style={{ fontSize: '13px', color: '#a1a1aa', background: 'none', border: 'none', cursor: 'pointer', padding: '8px 16px' }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => saveIntegration(editingIntegration)}
+                      disabled={!integrationApiKey.trim() || savingIntegration}
+                      style={{
+                        fontSize: '13px',
+                        color: '#000',
+                        backgroundColor: '#fff',
+                        border: 'none',
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        opacity: integrationApiKey.trim() && !savingIntegration ? 1 : 0.5,
+                      }}
+                    >
+                      {savingIntegration ? 'Saving...' : 'Connect'}
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </>
