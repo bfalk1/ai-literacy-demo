@@ -63,15 +63,15 @@ export async function POST(request: NextRequest) {
     // Log full payload to debug structure
     console.log('Ashby webhook payload:', JSON.stringify(event, null, 2));
     
-    // Ashby uses different field names - try common ones
-    const eventType = event.eventType || event.type || event.action || event.event;
+    // Ashby uses 'action' field
+    const eventType = event.action || event.eventType || event.type;
     console.log('Ashby webhook received:', eventType);
 
     // Handle different event types
     switch (eventType) {
+      case 'candidateStageChange':
       case 'applicationStageChanged':
       case 'application.stage.changed':
-      case 'candidateApplicationChangedStage':
         await handleStageChange(supabase, company, event);
         break;
       
@@ -103,21 +103,22 @@ async function handleStageChange(
   company: { id: string; ashby_trigger_stage?: string },
   event: Record<string, unknown>
 ) {
-  // Ashby payload structure varies - try multiple paths
-  const data = (event.data || event.payload || event) as Record<string, unknown>;
-  const application = (data.application || data.candidateApplication || event.application) as Record<string, unknown> | undefined;
-  const candidate = (data.candidate || event.candidate) as Record<string, unknown> | undefined;
+  // Ashby structure: data.application contains candidate nested inside
+  const data = event.data as Record<string, unknown>;
+  const application = data?.application as Record<string, unknown> | undefined;
+  // Candidate is nested inside application in Ashby webhooks
+  const candidate = (application?.candidate || data?.candidate) as Record<string, unknown> | undefined;
 
-  console.log('Processing stage change - application:', application, 'candidate:', candidate);
+  console.log('Processing stage change - application id:', application?.id, 'candidate:', candidate?.name);
 
-  if (!application && !candidate) {
-    console.log('Missing application and candidate data');
+  if (!application) {
+    console.log('Missing application data');
     return;
   }
 
-  // Check if the stage matches our trigger stage
-  const stage = (application?.currentInterviewStage || application?.interviewStage || application?.stage) as Record<string, unknown> | undefined;
-  const currentStageName = (stage?.name || stage?.title || application?.stageName || '')?.toString().toLowerCase();
+  // Check if the stage matches our trigger stage - Ashby uses 'title' not 'name'
+  const stage = application?.currentInterviewStage as Record<string, unknown> | undefined;
+  const currentStageName = (stage?.title || stage?.name || '')?.toString().toLowerCase();
   const triggerStage = company.ashby_trigger_stage?.toLowerCase() || 'assessment';
 
   if (!currentStageName.includes(triggerStage)) {
@@ -139,9 +140,10 @@ async function handleStageChange(
   const token = crypto.randomBytes(32).toString('hex');
   const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000); // 72 hours
 
-  // Get IDs safely
+  // Get IDs safely - Ashby nests job inside application
   const candidateName = (candidate?.name || candidate?.fullName || '')?.toString();
-  const jobId = (application?.jobId || application?.job_id || '')?.toString();
+  const job = application?.job as Record<string, unknown> | undefined;
+  const jobId = (job?.id || application?.jobId || '')?.toString();
   const applicationId = (application?.id || '')?.toString();
   const candidateId = (candidate?.id || '')?.toString();
 
