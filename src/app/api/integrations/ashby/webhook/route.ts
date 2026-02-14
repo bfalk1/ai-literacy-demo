@@ -58,13 +58,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse the webhook event
-    const event: AshbyWebhookPayload = JSON.parse(rawBody);
+    const event = JSON.parse(rawBody);
     
-    console.log('Ashby webhook received:', event.eventType);
+    // Log full payload to debug structure
+    console.log('Ashby webhook payload:', JSON.stringify(event, null, 2));
+    
+    // Ashby uses different field names - try common ones
+    const eventType = event.eventType || event.type || event.action || event.event;
+    console.log('Ashby webhook received:', eventType);
 
     // Handle different event types
-    switch (event.eventType) {
+    switch (eventType) {
       case 'applicationStageChanged':
+      case 'application.stage.changed':
+      case 'candidateApplicationChangedStage':
         await handleStageChange(supabase, company, event);
         break;
       
@@ -94,18 +101,23 @@ export async function POST(request: NextRequest) {
 async function handleStageChange(
   supabase: ReturnType<typeof createServerClient>,
   company: { id: string; ashby_trigger_stage?: string },
-  event: AshbyWebhookPayload
+  event: Record<string, unknown>
 ) {
-  const application = event.data.application;
-  const candidate = event.data.candidate;
+  // Ashby payload structure varies - try multiple paths
+  const data = (event.data || event.payload || event) as Record<string, unknown>;
+  const application = (data.application || data.candidateApplication || event.application) as Record<string, unknown> | undefined;
+  const candidate = (data.candidate || event.candidate) as Record<string, unknown> | undefined;
 
-  if (!application || !candidate) {
-    console.log('Missing application or candidate data');
+  console.log('Processing stage change - application:', application, 'candidate:', candidate);
+
+  if (!application && !candidate) {
+    console.log('Missing application and candidate data');
     return;
   }
 
   // Check if the stage matches our trigger stage
-  const currentStageName = application.currentInterviewStage?.name?.toLowerCase() || '';
+  const stage = (application?.currentInterviewStage || application?.interviewStage || application?.stage) as Record<string, unknown> | undefined;
+  const currentStageName = (stage?.name || stage?.title || application?.stageName || '')?.toString().toLowerCase();
   const triggerStage = company.ashby_trigger_stage?.toLowerCase() || 'assessment';
 
   if (!currentStageName.includes(triggerStage)) {
@@ -113,10 +125,13 @@ async function handleStageChange(
     return;
   }
 
-  // Get candidate email
-  const email = candidate.primaryEmailAddress?.value;
+  // Get candidate email - try multiple paths
+  const primaryEmail = candidate?.primaryEmailAddress as Record<string, unknown> | undefined;
+  const emailAddresses = candidate?.emailAddresses as Array<Record<string, unknown>> | undefined;
+  const email = primaryEmail?.value || emailAddresses?.[0]?.value || candidate?.email;
+  
   if (!email) {
-    console.error('No email found for candidate');
+    console.error('No email found for candidate:', candidate);
     return;
   }
 
@@ -124,19 +139,25 @@ async function handleStageChange(
   const token = crypto.randomBytes(32).toString('hex');
   const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000); // 72 hours
 
+  // Get IDs safely
+  const candidateName = (candidate?.name || candidate?.fullName || '')?.toString();
+  const jobId = (application?.jobId || application?.job_id || '')?.toString();
+  const applicationId = (application?.id || '')?.toString();
+  const candidateId = (candidate?.id || '')?.toString();
+
   // Create invitation in Supabase
   const { data: invitation, error } = await supabase!
     .from('invitations')
     .insert({
       company_id: company.id,
       token,
-      candidate_email: email,
-      candidate_name: candidate.name || '',
+      candidate_email: email.toString(),
+      candidate_name: candidateName,
       expires_at: expiresAt.toISOString(),
       ats_provider: 'ashby',
-      ats_job_id: application.jobId,
-      ats_application_id: application.id,
-      ats_candidate_id: candidate.id,
+      ats_job_id: jobId,
+      ats_application_id: applicationId,
+      ats_candidate_id: candidateId,
     })
     .select()
     .single();
