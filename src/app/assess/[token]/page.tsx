@@ -12,6 +12,7 @@ interface Invitation {
   used_at: string | null;
   ats_job_id: string | null;
   ats_application_id: string | null;
+  assessment_type: string | null;
 }
 
 export default function AssessPage({ params }: { params: Promise<{ token: string }> }) {
@@ -58,7 +59,12 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
     if (invitation.ats_job_id) localStorage.setItem("atsJobId", invitation.ats_job_id);
     if (invitation.ats_application_id) localStorage.setItem("atsApplicationId", invitation.ats_application_id);
 
-    router.push("/assessment");
+    // Go directly to assessment if type is specified, otherwise let them choose
+    if (invitation.assessment_type) {
+      router.push(`/assessment/${invitation.assessment_type}`);
+    } else {
+      router.push(`/assess/${token}/select`);
+    }
   };
 
   if (loading) {

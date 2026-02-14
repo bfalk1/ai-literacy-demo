@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     // Get company's Lever settings
     const { data: company } = await supabase
       .from('companies')
-      .select('id, lever_api_key, lever_signing_token, lever_trigger_stage')
+      .select('id, lever_api_key, lever_signing_token, lever_trigger_stage, default_assessment_type')
       .eq('id', companyId)
       .single();
 
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
 
 async function handleStageChange(
   supabase: ReturnType<typeof createServerClient>,
-  company: { id: string; lever_api_key?: string; lever_trigger_stage?: string },
+  company: { id: string; lever_api_key?: string; lever_trigger_stage?: string; default_assessment_type?: string },
   event: LeverWebhookPayload
 ) {
   const { opportunityId, toStageId } = event.data;
@@ -136,6 +136,12 @@ async function handleStageChange(
     return;
   }
 
+  // Check if company has assessment type configured
+  if (!company.default_assessment_type) {
+    console.error('Company has no default_assessment_type configured');
+    return;
+  }
+
   // Generate invitation token
   const token = crypto.randomBytes(32).toString('hex');
   const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000); // 72 hours
@@ -153,6 +159,7 @@ async function handleStageChange(
       ats_job_id: '', // Lever uses opportunities, not direct job IDs in webhook
       ats_application_id: opportunityId,
       ats_candidate_id: event.data.candidateId,
+      assessment_type: company.default_assessment_type,
     })
     .select()
     .single();

@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     // Get company's Greenhouse settings
     const { data: company } = await supabase
       .from('companies')
-      .select('id, greenhouse_secret_key, greenhouse_trigger_stage')
+      .select('id, greenhouse_secret_key, greenhouse_trigger_stage, default_assessment_type')
       .eq('id', companyId)
       .single();
 
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
 
 async function handleStageChange(
   supabase: ReturnType<typeof createServerClient>,
-  company: { id: string; greenhouse_trigger_stage?: string },
+  company: { id: string; greenhouse_trigger_stage?: string; default_assessment_type?: string },
   event: GreenhouseWebhookEvent
 ) {
   const application = event.payload.application;
@@ -116,6 +116,12 @@ async function handleStageChange(
     return;
   }
 
+  // Check if company has assessment type configured
+  if (!company.default_assessment_type) {
+    console.error('Company has no default_assessment_type configured');
+    return;
+  }
+
   // Generate invitation token
   const token = crypto.randomBytes(32).toString('hex');
   const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000); // 72 hours
@@ -133,6 +139,7 @@ async function handleStageChange(
       ats_job_id: String(application.job_id),
       ats_application_id: String(application.id),
       ats_candidate_id: String(candidate.id),
+      assessment_type: company.default_assessment_type,
     })
     .select()
     .single();

@@ -35,29 +35,63 @@ async function verifyApiKey(request: NextRequest) {
 
 // POST - Create invitation
 export async function POST(request: NextRequest) {
-  const companyId = await verifyApiKey(request);
+  let companyId = await verifyApiKey(request);
   
-  if (!companyId) {
-    return NextResponse.json({ error: 'Invalid or missing API key' }, { status: 401 });
-  }
-
   const supabase = createServerClient();
   if (!supabase) {
     return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+  }
+
+  // If no API key, allow internal dashboard calls with company_id in body
+  if (!companyId) {
+    const body = await request.clone().json();
+    if (body.company_id) {
+      // Verify company exists (basic validation)
+      const { data: company } = await supabase
+        .from('companies')
+        .select('id')
+        .eq('id', body.company_id)
+        .single();
+      if (company) {
+        companyId = body.company_id;
+      }
+    }
+  }
+
+  if (!companyId) {
+    return NextResponse.json({ error: 'Invalid or missing API key or company_id' }, { status: 401 });
   }
 
   try {
     const body = await request.json();
     const { 
       candidateEmail, 
-      candidateName, 
+      candidate_email,
+      candidateName,
+      candidate_name,
       expiresInHours = 72,
       atsJobId,
+      ats_job_id,
       atsApplicationId,
+      ats_application_id,
+      assessmentType,
+      assessment_type,
+      company_id, // Allow passing company_id from dashboard
     } = body;
 
-    if (!candidateEmail) {
+    const email = candidateEmail || candidate_email;
+    const name = candidateName || candidate_name;
+    const jobId = atsJobId || ats_job_id;
+    const appId = atsApplicationId || ats_application_id;
+    const assType = assessmentType || assessment_type;
+    const targetCompanyId = company_id || companyId;
+
+    if (!email) {
       return NextResponse.json({ error: 'candidateEmail is required' }, { status: 400 });
+    }
+
+    if (!assType) {
+      return NextResponse.json({ error: 'assessmentType is required' }, { status: 400 });
     }
 
     // Generate secure token
@@ -67,13 +101,14 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('invitations')
       .insert({
-        company_id: companyId,
+        company_id: targetCompanyId,
         token,
-        candidate_email: candidateEmail,
-        candidate_name: candidateName || null,
+        candidate_email: email,
+        candidate_name: name || null,
         expires_at: expiresAt.toISOString(),
-        ats_job_id: atsJobId || null,
-        ats_application_id: atsApplicationId || null,
+        ats_job_id: jobId || null,
+        ats_application_id: appId || null,
+        assessment_type: assType || null,
       })
       .select()
       .single();
@@ -93,9 +128,11 @@ export async function POST(request: NextRequest) {
         token,
         assessmentUrl,
         expiresAt: expiresAt.toISOString(),
-        candidateEmail,
-        candidateName,
+        candidateEmail: email,
+        candidateName: name,
+        assessmentType: assType,
       },
+      assessment_url: assessmentUrl, // For dashboard convenience
     });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create invitation' }, { status: 500 });

@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
       expires_at: invitation.expires_at,
       ats_job_id: invitation.ats_job_id,
       ats_application_id: invitation.ats_application_id,
+      assessment_type: invitation.assessment_type,
     },
   });
 }

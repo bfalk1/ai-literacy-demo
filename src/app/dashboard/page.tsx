@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getSupabase } from "@/lib/supabase";
+import { ASSESSMENT_TYPES, getIndustries } from "@/lib/assessment-types";
 
 interface Company {
   id: string;
@@ -15,6 +16,7 @@ interface Company {
   greenhouse_api_key?: string;
   lever_enabled?: boolean;
   lever_api_key?: string;
+  default_assessment_type?: string;
 }
 
 interface Assessment {
@@ -46,6 +48,12 @@ export default function DashboardPage() {
   const [editingIntegration, setEditingIntegration] = useState<'ashby' | 'greenhouse' | 'lever' | null>(null);
   const [integrationApiKey, setIntegrationApiKey] = useState("");
   const [savingIntegration, setSavingIntegration] = useState(false);
+  
+  // Assessment type config for ATS
+  const [showAssessmentConfig, setShowAssessmentConfig] = useState(false);
+  const [selectedAssessmentType, setSelectedAssessmentType] = useState("");
+  const [assessmentIndustryFilter, setAssessmentIndustryFilter] = useState<string | null>(null);
+  const [savingAssessmentType, setSavingAssessmentType] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -70,7 +78,7 @@ export default function DashboardPage() {
     // Load company with integration settings
     const { data: companyData, error: companyError } = await supabase
       .from('companies')
-      .select('id, name, slug, ashby_enabled, ashby_api_key, greenhouse_enabled, greenhouse_api_key, lever_enabled, lever_api_key')
+      .select('id, name, slug, ashby_enabled, ashby_api_key, greenhouse_enabled, greenhouse_api_key, lever_enabled, lever_api_key, default_assessment_type')
       .eq('owner_id', user.id)
       .single();
 
@@ -194,6 +202,27 @@ export default function DashboardPage() {
     router.push("/auth/login");
   };
 
+  const saveAssessmentType = async () => {
+    if (!selectedAssessmentType || !company) return;
+    setSavingAssessmentType(true);
+
+    const supabase = getSupabase();
+    if (!supabase) return;
+
+    await supabase
+      .from('companies')
+      .update({ default_assessment_type: selectedAssessmentType })
+      .eq('id', company.id);
+
+    setCompany({ ...company, default_assessment_type: selectedAssessmentType });
+    setShowAssessmentConfig(false);
+    setSavingAssessmentType(false);
+  };
+
+  const filteredAssessmentTypes = assessmentIndustryFilter
+    ? ASSESSMENT_TYPES.filter(a => a.industry === assessmentIndustryFilter)
+    : ASSESSMENT_TYPES;
+
   if (loading) {
     return (
       <div style={{ minHeight: '100dvh', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -247,16 +276,6 @@ export default function DashboardPage() {
       <main style={{ padding: '24px 20px', maxWidth: '800px', margin: '0 auto' }}>
         {activeTab === 'assessments' && (
           <>
-            <div style={{ marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>Assessment Link</h2>
-              <div style={{ backgroundColor: '#18181b', borderRadius: '8px', padding: '12px', fontSize: '13px', color: '#a1a1aa', wordBreak: 'break-all' }}>
-                {assessmentLink}
-              </div>
-              <p style={{ fontSize: '12px', color: '#52525b', marginTop: '8px' }}>
-                Send this link to candidates. Results will appear below.
-              </p>
-            </div>
-
             <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px' }}>Recent Assessments</h2>
             {assessments.length === 0 ? (
               <p style={{ color: '#52525b', fontSize: '14px' }}>No assessments yet</p>
@@ -280,6 +299,55 @@ export default function DashboardPage() {
 
         {activeTab === 'integrations' && (
           <>
+            {/* Assessment Type Config */}
+            <div style={{ marginBottom: '32px', padding: '20px', backgroundColor: '#18181b', borderRadius: '12px', border: company?.default_assessment_type ? '1px solid #27272a' : '1px solid #f59e0b' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                <div>
+                  <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>Assessment Type</h2>
+                  <p style={{ fontSize: '13px', color: '#71717a' }}>
+                    Choose which assessment candidates will receive
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setSelectedAssessmentType(company?.default_assessment_type || '');
+                    setShowAssessmentConfig(true);
+                  }}
+                  style={{
+                    fontSize: '13px',
+                    color: '#fff',
+                    backgroundColor: '#27272a',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {company?.default_assessment_type ? 'Change' : 'Configure'}
+                </button>
+              </div>
+              {company?.default_assessment_type ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {(() => {
+                    const type = ASSESSMENT_TYPES.find(t => t.id === company.default_assessment_type);
+                    return type ? (
+                      <>
+                        <span style={{ fontSize: '24px' }}>{type.icon}</span>
+                        <div>
+                          <div style={{ fontSize: '14px', fontWeight: 600 }}>{type.name}</div>
+                          <div style={{ fontSize: '12px', color: '#71717a' }}>{type.industry} • {type.environment}</div>
+                        </div>
+                      </>
+                    ) : null;
+                  })()}
+                </div>
+              ) : (
+                <p style={{ fontSize: '13px', color: '#f59e0b' }}>
+                  ⚠️ No assessment type configured. Configure one to start sending assessments.
+                </p>
+              )}
+            </div>
+
             <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>ATS Integrations</h2>
             <p style={{ fontSize: '13px', color: '#71717a', marginBottom: '24px' }}>
               Connect your ATS to automatically trigger assessments when candidates reach a specific stage.
@@ -587,6 +655,108 @@ export default function DashboardPage() {
           </>
         )}
       </main>
+
+      {/* Assessment Type Config Modal */}
+      {showAssessmentConfig && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+          <div style={{ backgroundColor: '#18181b', borderRadius: '12px', padding: '24px', maxWidth: '500px', width: '100%', margin: '20px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>Select Assessment Type</h3>
+            <p style={{ fontSize: '13px', color: '#71717a', marginBottom: '20px' }}>
+              All candidates from your ATS will receive this assessment.
+            </p>
+
+            {/* Industry filter */}
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}>
+              <button
+                onClick={() => setAssessmentIndustryFilter(null)}
+                style={{
+                  padding: '6px 12px',
+                  fontSize: '11px',
+                  backgroundColor: !assessmentIndustryFilter ? '#fff' : 'transparent',
+                  color: !assessmentIndustryFilter ? '#000' : '#71717a',
+                  border: '1px solid #27272a',
+                  borderRadius: '16px',
+                  cursor: 'pointer',
+                }}
+              >
+                All
+              </button>
+              {getIndustries().map((industry) => (
+                <button
+                  key={industry}
+                  onClick={() => setAssessmentIndustryFilter(industry)}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '11px',
+                    backgroundColor: assessmentIndustryFilter === industry ? '#fff' : 'transparent',
+                    color: assessmentIndustryFilter === industry ? '#000' : '#71717a',
+                    border: '1px solid #27272a',
+                    borderRadius: '16px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {industry}
+                </button>
+              ))}
+            </div>
+
+            {/* Assessment type grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxHeight: '300px', overflowY: 'auto', marginBottom: '20px' }}>
+              {filteredAssessmentTypes.map((type) => (
+                <button
+                  key={type.id}
+                  onClick={() => setSelectedAssessmentType(type.id)}
+                  style={{
+                    padding: '12px',
+                    backgroundColor: selectedAssessmentType === type.id ? '#3b82f6' : '#0a0a0a',
+                    border: `1px solid ${selectedAssessmentType === type.id ? '#3b82f6' : '#27272a'}`,
+                    borderRadius: '8px',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '18px' }}>{type.icon}</span>
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 600, color: '#fff' }}>{type.name}</div>
+                      <div style={{ fontSize: '10px', color: selectedAssessmentType === type.id ? '#93c5fd' : '#71717a' }}>
+                        {type.industry}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => { setShowAssessmentConfig(false); setSelectedAssessmentType(""); }}
+                style={{ fontSize: '13px', color: '#a1a1aa', background: 'none', border: 'none', cursor: 'pointer', padding: '10px 16px' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveAssessmentType}
+                disabled={!selectedAssessmentType || savingAssessmentType}
+                style={{
+                  fontSize: '13px',
+                  color: '#000',
+                  backgroundColor: '#fff',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  opacity: selectedAssessmentType && !savingAssessmentType ? 1 : 0.5,
+                }}
+              >
+                {savingAssessmentType ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

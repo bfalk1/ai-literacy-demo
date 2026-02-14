@@ -1,6 +1,9 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Only initialize Resend if API key is available
+const resend = process.env.RESEND_API_KEY 
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 interface AssessmentInviteEmail {
   to: string;
@@ -19,6 +22,11 @@ export async function sendAssessmentInvite({
   assessmentUrl,
   expiresAt,
 }: AssessmentInviteEmail) {
+  if (!resend) {
+    console.warn('Resend not configured - skipping email send');
+    return { id: 'skipped-no-api-key' };
+  }
+
   const firstName = candidateName.split(' ')[0] || 'there';
   const expiresIn = Math.round((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60));
 

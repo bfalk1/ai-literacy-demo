@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     // Get company's Ashby settings
     const { data: company } = await supabase
       .from('companies')
-      .select('id, ashby_secret_key, ashby_trigger_stage')
+      .select('id, ashby_secret_key, ashby_trigger_stage, default_assessment_type')
       .eq('id', companyId)
       .single();
 
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
 
 async function handleStageChange(
   supabase: ReturnType<typeof createServerClient>,
-  company: { id: string; ashby_trigger_stage?: string },
+  company: { id: string; ashby_trigger_stage?: string; default_assessment_type?: string },
   event: Record<string, unknown>
 ) {
   // Ashby structure: data.application contains candidate nested inside
@@ -148,6 +148,12 @@ async function handleStageChange(
   const applicationId = (application?.id || '')?.toString();
   const candidateId = (candidate?.id || '')?.toString();
 
+  // Check if company has assessment type configured
+  if (!company.default_assessment_type) {
+    console.error('Company has no default_assessment_type configured');
+    return;
+  }
+
   // Create invitation in Supabase
   const { data: invitation, error } = await supabase!
     .from('invitations')
@@ -161,6 +167,7 @@ async function handleStageChange(
       ats_job_id: jobId,
       ats_application_id: applicationId,
       ats_candidate_id: candidateId,
+      assessment_type: company.default_assessment_type,
     })
     .select()
     .single();
