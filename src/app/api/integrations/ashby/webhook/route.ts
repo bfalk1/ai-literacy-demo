@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
-import { verifyAshbyWebhook, AshbyWebhookPayload } from '@/lib/ashby';
+import { verifyAshbyWebhook } from '@/lib/ashby';
+import { sendAssessmentInvite } from '@/lib/email';
 import crypto from 'crypto';
 
 /**
@@ -171,8 +172,24 @@ async function handleStageChange(
 
   console.log('Created invitation for', email, 'token:', token);
 
-  // TODO: Send email to candidate with assessment link
-  // Email integration would go here (SendGrid, Resend, etc.)
+  // Send email to candidate
+  const assessmentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/assess/${token}`;
+  const job = application?.job as Record<string, unknown> | undefined;
+  
+  try {
+    await sendAssessmentInvite({
+      to: email.toString(),
+      candidateName: candidateName,
+      companyName: 'Telescopic Demo', // TODO: Get from company record
+      jobTitle: job?.title?.toString(),
+      assessmentUrl,
+      expiresAt,
+    });
+    console.log('Assessment invite email sent to', email);
+  } catch (emailError) {
+    console.error('Failed to send assessment invite email:', emailError);
+    // Don't fail the webhook if email fails - invitation is still created
+  }
 }
 
 // Handle GET for webhook verification
