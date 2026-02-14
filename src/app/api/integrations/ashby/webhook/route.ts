@@ -174,7 +174,6 @@ async function handleStageChange(
 
   // Send email to candidate
   const assessmentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/assess/${token}`;
-  const job = application?.job as Record<string, unknown> | undefined;
   
   try {
     await sendAssessmentInvite({
