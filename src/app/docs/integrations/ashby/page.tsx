@@ -1,54 +1,54 @@
 export default function AshbyDocsPage() {
   return (
-    <div className="prose prose-indigo max-w-none">
-      <h1>Ashby Integration</h1>
+    <div>
+      <h1 className="text-2xl font-semibold mb-4">Ashby Integration</h1>
       
-      <p className="lead text-xl text-gray-600">
+      <p className="text-lg text-zinc-400 mb-6">
         Connect Telescopic to Ashby to automatically send AI literacy assessments when 
-        candidates reach a specific interview stage, and sync results back to candidate profiles.
+        candidates reach a specific interview stage.
       </p>
 
-      <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 my-6 not-prose">
-        <p className="text-indigo-800 font-medium">⏱️ Setup time: ~10 minutes</p>
+      <div className="bg-indigo-950/50 border border-indigo-900 rounded-lg px-4 py-3 mb-8">
+        <p className="text-indigo-300 text-sm">⏱️ Setup time: ~10 minutes</p>
       </div>
 
-      <h2>Prerequisites</h2>
-      <ul>
+      <h2 className="text-lg font-semibold mb-4 mt-10">Prerequisites</h2>
+      <ul className="list-disc list-inside space-y-2 text-zinc-400 mb-8">
         <li>Admin access to your Ashby account</li>
         <li>A Telescopic account with API access</li>
       </ul>
 
-      <h2>Step 1: Create an Ashby API Key</h2>
-      <ol>
+      <h2 className="text-lg font-semibold mb-4 mt-10">Step 1: Create an Ashby API Key</h2>
+      <ol className="list-decimal list-inside space-y-3 text-zinc-400 mb-8">
         <li>Log into Ashby as an admin</li>
-        <li>Navigate to <strong>Admin → Integrations → API Keys</strong></li>
-        <li>Click <strong>Create API Key</strong></li>
-        <li>Name it <code>Telescopic Integration</code></li>
+        <li>Navigate to <span className="text-white">Admin → Integrations → API Keys</span></li>
+        <li>Click <span className="text-white">Create API Key</span></li>
+        <li>Name it <code className="bg-zinc-800 px-2 py-0.5 rounded text-sm">Telescopic Integration</code></li>
         <li>
           Grant these permissions:
-          <ul>
-            <li><code>candidates:read</code></li>
-            <li><code>candidates:write</code></li>
-            <li><code>jobs:read</code></li>
-            <li><code>applications:read</code></li>
+          <ul className="list-disc list-inside ml-6 mt-2 space-y-1">
+            <li><code className="bg-zinc-800 px-2 py-0.5 rounded text-sm">candidates:read</code></li>
+            <li><code className="bg-zinc-800 px-2 py-0.5 rounded text-sm">candidates:write</code></li>
+            <li><code className="bg-zinc-800 px-2 py-0.5 rounded text-sm">jobs:read</code></li>
+            <li><code className="bg-zinc-800 px-2 py-0.5 rounded text-sm">applications:read</code></li>
           </ul>
         </li>
-        <li>Click <strong>Create</strong> and copy the API key (you won't see it again)</li>
+        <li>Click <span className="text-white">Create</span> and copy the API key</li>
       </ol>
 
-      <h2>Step 2: Add Your API Key to Telescopic</h2>
-      <ol>
-        <li>Go to your <a href="/dashboard/settings">Telescopic Settings</a></li>
-        <li>Navigate to <strong>Integrations → Ashby</strong></li>
+      <h2 className="text-lg font-semibold mb-4 mt-10">Step 2: Configure Telescopic</h2>
+      <ol className="list-decimal list-inside space-y-3 text-zinc-400 mb-4">
+        <li>Go to your Telescopic Dashboard</li>
+        <li>Navigate to <span className="text-white">Settings → Integrations → Ashby</span></li>
         <li>Paste your Ashby API key</li>
-        <li>Set your <strong>Trigger Stage</strong> (e.g., "Assessment")</li>
-        <li>Click <strong>Save</strong></li>
+        <li>Set your trigger stage (e.g., &quot;Assessment&quot;)</li>
+        <li>Click <span className="text-white">Save</span></li>
       </ol>
       
-      <p>Alternatively, use our API:</p>
+      <p className="text-zinc-500 mb-4">Or use the API:</p>
       
-      <div className="bg-gray-900 rounded-lg p-4 my-4 not-prose overflow-x-auto">
-        <pre className="text-gray-100 text-sm">
+      <div className="bg-zinc-900 rounded-lg p-4 mb-8 overflow-x-auto">
+        <pre className="text-sm text-zinc-300">
 {`curl -X POST https://telescopic.ca/api/integrations/ashby/config \\
   -H "Authorization: Bearer YOUR_TELESCOPIC_API_KEY" \\
   -H "Content-Type: application/json" \\
@@ -60,146 +60,138 @@ export default function AshbyDocsPage() {
         </pre>
       </div>
 
-      <h2>Step 3: Set Up the Webhook in Ashby</h2>
-      <p>
-        Webhooks allow Ashby to notify Telescopic when candidates move between interview stages.
+      <h2 className="text-lg font-semibold mb-4 mt-10">Step 3: Set Up Webhook in Ashby</h2>
+      <p className="text-zinc-400 mb-4">
+        Webhooks notify Telescopic when candidates move between interview stages.
       </p>
       
-      <ol>
-        <li>In Ashby, go to <strong>Admin → Integrations → Webhooks</strong></li>
-        <li>Click <strong>Add Webhook</strong></li>
+      <ol className="list-decimal list-inside space-y-3 text-zinc-400 mb-4">
+        <li>In Ashby, go to <span className="text-white">Admin → Integrations → Webhooks</span></li>
+        <li>Click <span className="text-white">Add Webhook</span></li>
         <li>
-          Configure the webhook:
-          <ul>
-            <li><strong>Name:</strong> Telescopic</li>
-            <li><strong>Webhook Type:</strong> Candidate Application Changed Stage</li>
-            <li>
-              <strong>Request URL:</strong>
-              <div className="bg-gray-100 rounded p-2 my-2 font-mono text-sm break-all">
-                https://telescopic.ca/api/integrations/ashby/webhook?company_id=YOUR_COMPANY_ID
-              </div>
-            </li>
-            <li><strong>Enabled:</strong> ✓ Checked</li>
+          Configure:
+          <ul className="list-disc list-inside ml-6 mt-2 space-y-1">
+            <li><span className="text-white">Name:</span> Telescopic</li>
+            <li><span className="text-white">Webhook Type:</span> Candidate Application Changed Stage</li>
+            <li><span className="text-white">Request URL:</span></li>
           </ul>
         </li>
-        <li>Click <strong>Create Webhook</strong></li>
       </ol>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 my-6 not-prose">
-        <p className="text-amber-800">
-          <strong>💡 Tip:</strong> You can find your Company ID in your Telescopic dashboard 
-          under Settings → API.
+      <div className="bg-zinc-900 rounded-lg p-4 mb-4 overflow-x-auto">
+        <code className="text-sm text-zinc-300 break-all">
+          https://telescopic.ca/api/integrations/ashby/webhook?company_id=YOUR_COMPANY_ID
+        </code>
+      </div>
+
+      <ol className="list-decimal list-inside space-y-3 text-zinc-400 mb-8" start={4}>
+        <li>Check <span className="text-white">Enabled</span></li>
+        <li>Click <span className="text-white">Create Webhook</span></li>
+      </ol>
+
+      <div className="bg-amber-950/50 border border-amber-900 rounded-lg px-4 py-3 mb-8">
+        <p className="text-amber-300 text-sm">
+          💡 Find your Company ID in your Telescopic dashboard under Settings → API
         </p>
       </div>
 
-      <h2>Step 4: Create an Assessment Stage</h2>
-      <p>
-        If you don't already have one, create an interview stage that will trigger assessments:
+      <h2 className="text-lg font-semibold mb-4 mt-10">Step 4: Create an Assessment Stage</h2>
+      <p className="text-zinc-400 mb-4">
+        Add an interview stage that will trigger assessments:
       </p>
-      <ol>
-        <li>In Ashby, go to a job's <strong>Interview Plan</strong></li>
-        <li>Click <strong>Add Stage</strong></li>
-        <li>Name it <strong>Assessment</strong> (or whatever you configured as your trigger stage)</li>
+      <ol className="list-decimal list-inside space-y-3 text-zinc-400 mb-8">
+        <li>In Ashby, go to a job&apos;s <span className="text-white">Interview Plan</span></li>
+        <li>Click <span className="text-white">Add Stage</span></li>
+        <li>Name it <span className="text-white">Assessment</span> (must match your trigger stage)</li>
         <li>Position it where you want candidates to take the assessment</li>
       </ol>
 
-      <h2>Step 5: Test the Integration</h2>
-      <ol>
+      <h2 className="text-lg font-semibold mb-4 mt-10">Step 5: Test the Integration</h2>
+      <ol className="list-decimal list-inside space-y-3 text-zinc-400 mb-8">
         <li>Move a test candidate to your Assessment stage</li>
         <li>Check that they receive an email with the assessment link</li>
         <li>Complete the assessment</li>
-        <li>Verify results appear on the candidate's Activity tab in Ashby</li>
+        <li>Verify results appear on the candidate&apos;s Activity tab in Ashby</li>
       </ol>
 
-      <h2>How It Works</h2>
+      <h2 className="text-lg font-semibold mb-4 mt-10">How It Works</h2>
       
-      <div className="bg-gray-50 rounded-lg p-6 my-6 not-prose">
-        <div className="flex flex-col space-y-4">
-          <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
-            <div>
-              <p className="font-medium">Candidate moves to Assessment stage</p>
-              <p className="text-sm text-gray-600">Recruiter drags candidate in Ashby</p>
+      <div className="bg-zinc-900 rounded-lg p-6 mb-8">
+        <div className="space-y-4">
+          {[
+            { step: 1, title: 'Candidate moves to Assessment stage', desc: 'Recruiter drags candidate in Ashby' },
+            { step: 2, title: 'Ashby sends webhook to Telescopic', desc: 'Automatic, happens instantly' },
+            { step: 3, title: 'Candidate receives assessment email', desc: 'Unique link valid for 72 hours' },
+            { step: 4, title: 'Candidate completes assessment', desc: '~15-20 minutes' },
+            { step: 5, title: 'Results pushed to Ashby', desc: 'Appears as activity on candidate profile' },
+          ].map(({ step, title, desc }) => (
+            <div key={step} className="flex items-center gap-4">
+              <div className="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0">
+                {step}
+              </div>
+              <div>
+                <p className="font-medium text-white">{title}</p>
+                <p className="text-sm text-zinc-500">{desc}</p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
-            <div>
-              <p className="font-medium">Ashby sends webhook to Telescopic</p>
-              <p className="text-sm text-gray-600">Automatic, happens instantly</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">3</div>
-            <div>
-              <p className="font-medium">Candidate receives assessment email</p>
-              <p className="text-sm text-gray-600">Unique link valid for 72 hours</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">4</div>
-            <div>
-              <p className="font-medium">Candidate completes assessment</p>
-              <p className="text-sm text-gray-600">~15-20 minutes</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">5</div>
-            <div>
-              <p className="font-medium">Results pushed to Ashby</p>
-              <p className="text-sm text-gray-600">Appears as a note on candidate profile</p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
-      <h2>Assessment Results in Ashby</h2>
-      <p>
-        After a candidate completes their assessment, results are automatically added to their 
-        profile in Ashby as an Activity note:
+      <h2 className="text-lg font-semibold mb-4 mt-10">Results in Ashby</h2>
+      <p className="text-zinc-400 mb-4">
+        After completion, results appear on the candidate&apos;s profile:
       </p>
       
-      <div className="bg-white border border-gray-300 rounded-lg p-4 my-4 not-prose font-mono text-sm">
-        <p className="font-bold text-lg mb-2">🎯 Telescopic AI Literacy Assessment Results</p>
-        <p><strong>Overall Score:</strong> 🟢 85/100</p>
-        <p className="mt-2"><strong>Breakdown:</strong></p>
-        <ul className="list-disc list-inside ml-2">
-          <li>Prompt Quality: 🟢 88/100</li>
-          <li>Context Usage: 🟢 82/100</li>
-          <li>Iteration Skills: 🟢 85/100</li>
-          <li>Efficiency: 🟢 84/100</li>
+      <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-5 mb-8 font-mono text-sm">
+        <p className="font-bold text-base mb-3">🎯 Telescopic AI Literacy Assessment</p>
+        <p className="text-zinc-300"><span className="text-white">Overall Score:</span> 🟢 85/100</p>
+        <p className="text-zinc-500 mt-3 mb-2">Breakdown:</p>
+        <ul className="space-y-1 text-zinc-400">
+          <li>• Prompt Quality: 🟢 88/100</li>
+          <li>• Context Usage: 🟢 82/100</li>
+          <li>• Iteration Skills: 🟢 85/100</li>
+          <li>• Efficiency: 🟢 84/100</li>
         </ul>
-        <p className="mt-2"><strong>Summary:</strong> Strong AI collaboration skills demonstrated.</p>
-        <p className="mt-2 text-indigo-600">🔗 View Full Results</p>
+        <p className="mt-3 text-zinc-300">Strong AI collaboration skills demonstrated.</p>
+        <p className="mt-3 text-indigo-400">🔗 View Full Results</p>
       </div>
 
-      <h2>Troubleshooting</h2>
+      <h2 className="text-lg font-semibold mb-4 mt-10">Troubleshooting</h2>
       
-      <h3>Webhook not firing</h3>
-      <ul>
-        <li>Verify the webhook is enabled in Ashby</li>
-        <li>Check the webhook URL includes your correct Company ID</li>
-        <li>Make sure you're moving candidates to the exact trigger stage name</li>
-      </ul>
+      <div className="space-y-6 mb-8">
+        <div>
+          <h3 className="font-medium text-white mb-2">Webhook not firing</h3>
+          <ul className="list-disc list-inside space-y-1 text-zinc-400 text-sm">
+            <li>Verify the webhook is enabled in Ashby</li>
+            <li>Check the URL includes your correct Company ID</li>
+            <li>Make sure you&apos;re moving candidates to the exact trigger stage name</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 className="font-medium text-white mb-2">Emails not sending</h3>
+          <ul className="list-disc list-inside space-y-1 text-zinc-400 text-sm">
+            <li>Check that your email domain is verified</li>
+            <li>Verify the candidate has a valid email in Ashby</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 className="font-medium text-white mb-2">Results not appearing in Ashby</h3>
+          <ul className="list-disc list-inside space-y-1 text-zinc-400 text-sm">
+            <li>Confirm your Ashby API key has <code className="bg-zinc-800 px-1 rounded">candidates:write</code> permission</li>
+            <li>Check the candidate ID is stored correctly</li>
+          </ul>
+        </div>
+      </div>
 
-      <h3>Emails not sending</h3>
-      <ul>
-        <li>Check that your email domain is verified in your email provider</li>
-        <li>Look for errors in your Telescopic logs</li>
-        <li>Verify the candidate has a valid email address in Ashby</li>
-      </ul>
-
-      <h3>Results not appearing in Ashby</h3>
-      <ul>
-        <li>Confirm your Ashby API key has <code>candidates:write</code> permission</li>
-        <li>Check the Telescopic logs for API errors</li>
-        <li>Verify the candidate ID is correctly stored in the invitation</li>
-      </ul>
-
-      <h2>Need Help?</h2>
-      <p>
-        Contact us at <a href="mailto:support@telescopic.ca">support@telescopic.ca</a> for 
-        integration support.
+      <h2 className="text-lg font-semibold mb-4 mt-10">Need Help?</h2>
+      <p className="text-zinc-400">
+        Contact us at{' '}
+        <a href="mailto:support@telescopic.ca" className="text-white hover:underline">
+          support@telescopic.ca
+        </a>
       </p>
     </div>
   );

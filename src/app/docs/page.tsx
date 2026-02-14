@@ -2,83 +2,98 @@ import Link from 'next/link';
 
 export default function DocsPage() {
   return (
-    <div className="prose prose-indigo max-w-none">
-      <h1>Telescopic Documentation</h1>
+    <div>
+      <h1 className="text-2xl font-semibold mb-4">Telescopic Documentation</h1>
       
-      <p className="lead text-xl text-gray-600">
+      <p className="text-lg text-zinc-400 mb-8">
         Telescopic is an AI literacy assessment platform that helps companies evaluate 
-        candidates' ability to effectively collaborate with AI tools.
+        candidates&apos; ability to effectively collaborate with AI tools.
       </p>
 
-      <h2>Quick Start</h2>
+      <h2 className="text-lg font-semibold mb-4">Quick Start</h2>
       
-      <ol>
+      <ol className="list-decimal list-inside space-y-3 text-zinc-300 mb-10">
         <li>
-          <strong>Connect your ATS</strong> — Set up Ashby or Greenhouse integration to 
-          automatically trigger assessments
+          <span className="font-medium text-white">Connect your ATS</span>
+          <span className="text-zinc-500"> — Set up Ashby or Greenhouse integration</span>
         </li>
         <li>
-          <strong>Configure your trigger stage</strong> — Choose which interview stage 
-          should send assessment invitations
+          <span className="font-medium text-white">Configure trigger stage</span>
+          <span className="text-zinc-500"> — Choose which interview stage sends assessments</span>
         </li>
         <li>
-          <strong>Candidates complete assessments</strong> — They receive an email with 
-          a link to the assessment
+          <span className="font-medium text-white">Candidates complete assessments</span>
+          <span className="text-zinc-500"> — They receive an email with a link</span>
         </li>
         <li>
-          <strong>Review results</strong> — Scores are automatically pushed back to your 
-          ATS and available in your dashboard
+          <span className="font-medium text-white">Review results</span>
+          <span className="text-zinc-500"> — Scores are pushed back to your ATS</span>
         </li>
       </ol>
 
-      <h2>Integrations</h2>
+      <h2 className="text-lg font-semibold mb-4">Integrations</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose mt-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
         <Link 
           href="/docs/integrations/ashby"
-          className="block p-6 bg-gray-50 rounded-lg border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
+          className="block p-5 bg-zinc-900 rounded-lg border border-zinc-800 hover:border-zinc-700 transition-colors"
         >
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Ashby</h3>
-          <p className="text-gray-600 text-sm">
-            Connect Telescopic to Ashby for automatic assessment triggers and result syncing.
+          <h3 className="text-base font-semibold mb-2">Ashby</h3>
+          <p className="text-sm text-zinc-500">
+            Automatic assessment triggers and result syncing with Ashby.
           </p>
         </Link>
         
         <Link 
           href="/docs/integrations/greenhouse"
-          className="block p-6 bg-gray-50 rounded-lg border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
+          className="block p-5 bg-zinc-900 rounded-lg border border-zinc-800 hover:border-zinc-700 transition-colors"
         >
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Greenhouse</h3>
-          <p className="text-gray-600 text-sm">
-            Connect Telescopic to Greenhouse for automatic assessment triggers and result syncing.
+          <h3 className="text-base font-semibold mb-2">Greenhouse</h3>
+          <p className="text-sm text-zinc-500">
+            Automatic assessment triggers and result syncing with Greenhouse.
           </p>
         </Link>
       </div>
 
-      <h2>How It Works</h2>
+      <h2 className="text-lg font-semibold mb-4">What We Measure</h2>
       
-      <h3>Assessment Flow</h3>
-      <ol>
-        <li>Recruiter moves candidate to the configured assessment stage in your ATS</li>
-        <li>Telescopic receives a webhook and creates an assessment invitation</li>
-        <li>Candidate receives an email with a unique assessment link</li>
-        <li>Candidate completes the AI literacy assessment (15-20 minutes)</li>
-        <li>Results are scored and automatically pushed back to your ATS</li>
-        <li>Recruiters can view detailed results on the candidate's profile</li>
-      </ol>
+      <div className="space-y-3 text-zinc-300 mb-10">
+        <div className="flex gap-3">
+          <span className="text-zinc-500">•</span>
+          <div>
+            <span className="font-medium text-white">Prompt Quality</span>
+            <span className="text-zinc-500"> — How well candidates craft effective prompts</span>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <span className="text-zinc-500">•</span>
+          <div>
+            <span className="font-medium text-white">Context Usage</span>
+            <span className="text-zinc-500"> — Ability to provide relevant context to AI</span>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <span className="text-zinc-500">•</span>
+          <div>
+            <span className="font-medium text-white">Iteration Skills</span>
+            <span className="text-zinc-500"> — How candidates refine and improve outputs</span>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <span className="text-zinc-500">•</span>
+          <div>
+            <span className="font-medium text-white">Efficiency</span>
+            <span className="text-zinc-500"> — Achieving goals with minimal back-and-forth</span>
+          </div>
+        </div>
+      </div>
 
-      <h3>What We Measure</h3>
-      <ul>
-        <li><strong>Prompt Quality</strong> — How well candidates craft effective prompts</li>
-        <li><strong>Context Usage</strong> — Ability to provide relevant context to AI</li>
-        <li><strong>Iteration Skills</strong> — How candidates refine and improve outputs</li>
-        <li><strong>Efficiency</strong> — Achieving goals with minimal back-and-forth</li>
-      </ul>
-
-      <h2>Need Help?</h2>
-      <p>
-        Contact us at <a href="mailto:support@telescopic.ca">support@telescopic.ca</a> for 
-        integration support or questions.
+      <h2 className="text-lg font-semibold mb-4">Need Help?</h2>
+      <p className="text-zinc-400">
+        Contact us at{' '}
+        <a href="mailto:support@telescopic.ca" className="text-white hover:underline">
+          support@telescopic.ca
+        </a>
       </p>
     </div>
   );
