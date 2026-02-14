@@ -161,6 +161,9 @@ export default function DashboardPage() {
       <header style={{ padding: '16px 20px', borderBottom: '1px solid #27272a', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a' }}>TELESCOPIC</span>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <Link href="/docs" style={{ fontSize: '13px', color: '#71717a', textDecoration: 'none' }}>
+            Docs
+          </Link>
           <span style={{ fontSize: '14px', color: '#a1a1aa' }}>{company?.name}</span>
           <button onClick={handleLogout} style={{ fontSize: '13px', color: '#71717a', background: 'none', border: 'none', cursor: 'pointer' }}>
             Sign out

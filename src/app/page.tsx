@@ -17,9 +17,14 @@ export default function Home() {
         <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', color: '#71717a' }}>
           TELESCOPIC
         </span>
-        <Link href="/auth/login" style={{ fontSize: '13px', color: '#71717a', textDecoration: 'none' }}>
-          Company login
-        </Link>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <Link href="/docs" style={{ fontSize: '13px', color: '#71717a', textDecoration: 'none' }}>
+            Docs
+          </Link>
+          <Link href="/auth/login" style={{ fontSize: '13px', color: '#71717a', textDecoration: 'none' }}>
+            Company login
+          </Link>
+        </div>
       </header>
 
       {/* Main */}
