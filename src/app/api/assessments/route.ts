@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
+import { AshbyClient } from '@/lib/ashby';
+import { GreenhouseClient } from '@/lib/greenhouse';
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,14 +59,65 @@ export async function POST(request: NextRequest) {
     }
 
     // Mark invitation as used if token provided
+    let invitation = null;
     if (invitationToken && data) {
-      await supabase
+      const { data: inv } = await supabase
         .from('invitations')
         .update({ 
           used_at: new Date().toISOString(),
           assessment_id: data.id,
         })
-        .eq('token', invitationToken);
+        .eq('token', invitationToken)
+        .select()
+        .single();
+      invitation = inv;
+    }
+
+    // Push results to ATS if this came from an ATS invitation
+    if (invitation?.ats_provider && invitation?.ats_candidate_id) {
+      try {
+        // Fetch company settings for ATS API keys
+        const { data: company } = await supabase
+          .from('companies')
+          .select('ashby_api_key, greenhouse_api_key')
+          .eq('id', invitation.company_id)
+          .single();
+        
+        if (invitation.ats_provider === 'ashby' && company?.ashby_api_key) {
+          const ashby = new AshbyClient({ apiKey: company.ashby_api_key });
+          await ashby.pushAssessmentResults(invitation.ats_candidate_id, {
+            candidateName: candidateName,
+            overallScore: analysis.score,
+            promptQualityScore: analysis.promptQuality.score,
+            contextScore: analysis.contextProvided.score,
+            iterationScore: analysis.iteration.score,
+            efficiencyScore: analysis.efficiency.score,
+            summary: analysis.summary,
+            assessmentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/results/${data.id}`,
+            duration: duration,
+          });
+          console.log('Pushed assessment results to Ashby for candidate:', invitation.ats_candidate_id);
+        }
+        
+        if (invitation.ats_provider === 'greenhouse' && company?.greenhouse_api_key) {
+          const greenhouse = new GreenhouseClient({ apiKey: company.greenhouse_api_key });
+          await greenhouse.pushAssessmentResults(parseInt(invitation.ats_candidate_id), {
+            candidateName: candidateName,
+            overallScore: analysis.score,
+            promptQualityScore: analysis.promptQuality.score,
+            contextScore: analysis.contextProvided.score,
+            iterationScore: analysis.iteration.score,
+            efficiencyScore: analysis.efficiency.score,
+            summary: analysis.summary,
+            assessmentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/results/${data.id}`,
+            duration: duration,
+          });
+          console.log('Pushed assessment results to Greenhouse for candidate:', invitation.ats_candidate_id);
+        }
+      } catch (atsError) {
+        console.error('Failed to push results to ATS:', atsError);
+        // Don't fail the request - assessment is saved, ATS sync can be retried
+      }
     }
 
     return NextResponse.json({ success: true, id: data.id });
