@@ -166,39 +166,9 @@ export class AshbyClient {
   // ============ Assessments ============
 
   /**
-   * Add a completed assessment to a candidate
-   * This is the primary method for Telescopic integration
-   */
-  async addCompletedAssessment(
-    candidateId: string,
-    assessment: {
-      title: string;
-      score?: number;
-      maxScore?: number;
-      result?: 'Passed' | 'Failed' | 'Completed';
-      completedAt?: string;
-      summaryHtml?: string;
-      detailsHtml?: string;
-      linkUrl?: string;
-      linkText?: string;
-    }
-  ): Promise<void> {
-    await this.request('assessment.addCompletedToCandidate', {
-      candidateId,
-      title: assessment.title,
-      score: assessment.score,
-      maxScore: assessment.maxScore,
-      result: assessment.result,
-      completedAt: assessment.completedAt || new Date().toISOString(),
-      summaryHtml: assessment.summaryHtml,
-      detailsHtml: assessment.detailsHtml,
-      linkUrl: assessment.linkUrl,
-      linkText: assessment.linkText,
-    });
-  }
-
-  /**
-   * Push Telescopic assessment results to Ashby
+   * Push Telescopic assessment results to Ashby as a candidate note
+   * Note: The assessment.addCompletedToCandidate API requires partner registration.
+   * Using candidate notes provides the same visibility without partner setup.
    */
   async pushAssessmentResults(
     candidateId: string,
@@ -220,32 +190,25 @@ export class AshbyClient {
       return '🔴';
     };
 
-    const summaryHtml = `
-      <p><strong>Overall Score:</strong> ${scoreEmoji(assessment.overallScore)} ${assessment.overallScore}/100</p>
-      <p>${assessment.summary || 'Assessment completed.'}</p>
-    `;
+    const note = `## 🎯 Telescopic AI Literacy Assessment Results
 
-    const detailsHtml = `
-      <h4>Score Breakdown</h4>
-      <ul>
-        <li><strong>Prompt Quality:</strong> ${scoreEmoji(assessment.promptQualityScore)} ${assessment.promptQualityScore}/100</li>
-        <li><strong>Context Usage:</strong> ${scoreEmoji(assessment.contextScore)} ${assessment.contextScore}/100</li>
-        <li><strong>Iteration Skills:</strong> ${scoreEmoji(assessment.iterationScore)} ${assessment.iterationScore}/100</li>
-        <li><strong>Efficiency:</strong> ${scoreEmoji(assessment.efficiencyScore)} ${assessment.efficiencyScore}/100</li>
-      </ul>
-      <p><strong>Duration:</strong> ${Math.round(assessment.duration / 60)} minutes</p>
-    `;
+**Candidate:** ${assessment.candidateName}
+**Overall Score:** ${scoreEmoji(assessment.overallScore)} ${assessment.overallScore}/100
 
-    await this.addCompletedAssessment(candidateId, {
-      title: 'Telescopic AI Literacy Assessment',
-      score: assessment.overallScore,
-      maxScore: 100,
-      result: assessment.overallScore >= 60 ? 'Passed' : 'Failed',
-      summaryHtml,
-      detailsHtml,
-      linkUrl: assessment.assessmentUrl,
-      linkText: 'View Full Results',
-    });
+### Breakdown:
+- **Prompt Quality:** ${scoreEmoji(assessment.promptQualityScore)} ${assessment.promptQualityScore}/100
+- **Context Usage:** ${scoreEmoji(assessment.contextScore)} ${assessment.contextScore}/100
+- **Iteration Skills:** ${scoreEmoji(assessment.iterationScore)} ${assessment.iterationScore}/100
+- **Efficiency:** ${scoreEmoji(assessment.efficiencyScore)} ${assessment.efficiencyScore}/100
+
+### Summary:
+${assessment.summary || 'Assessment completed.'}
+
+---
+⏱️ Duration: ${Math.round(assessment.duration / 60)} minutes
+${assessment.assessmentUrl ? `🔗 [View Full Results](${assessment.assessmentUrl})` : ''}`.trim();
+
+    await this.createCandidateNote(candidateId, note, false);
   }
 
   // ============ Connection Test ============
