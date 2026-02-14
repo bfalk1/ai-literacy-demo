@@ -36,20 +36,11 @@ export default function AshbyDocsPage() {
         </li>
       </ol>
 
-      <div className="bg-zinc-900 rounded-lg p-4 mb-4">
-        <p className="text-zinc-500 text-sm mb-2">Your webhook URL:</p>
-        <code className="text-sm text-zinc-300 break-all">
-          https://telescopic.ca/api/integrations/ashby/webhook?company_id=<span className="text-indigo-400">YOUR_COMPANY_ID</span>
-        </code>
-      </div>
-
-      <div className="bg-zinc-800 rounded-lg p-4 mb-4">
-        <p className="text-zinc-400 text-sm mb-2">To find your Company ID:</p>
-        <ol className="list-decimal list-inside space-y-1 text-zinc-400 text-sm">
-          <li>Go to your <a href="/dashboard" className="text-white hover:underline">Telescopic Dashboard</a></li>
-          <li>Navigate to <span className="text-white">Settings</span> tab</li>
-          <li>Copy your <span className="text-white">Company ID</span></li>
-        </ol>
+      <div className="bg-indigo-950/50 border border-indigo-900 rounded-lg p-4 mb-4">
+        <p className="text-indigo-300 text-sm mb-2">📋 Get your webhook URL:</p>
+        <p className="text-zinc-300 text-sm">
+          Go to your <a href="/dashboard" className="text-white underline hover:text-indigo-300">Telescopic Dashboard</a> → <span className="text-white">Settings</span> tab → copy the <span className="text-white">Ashby Webhook URL</span>
+        </p>
       </div>
 
       <ol className="list-decimal list-inside space-y-3 text-zinc-400 mb-8" start={4}>

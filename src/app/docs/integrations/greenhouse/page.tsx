@@ -78,10 +78,11 @@ export default function GreenhouseDocsPage() {
         </li>
       </ol>
 
-      <div className="bg-zinc-900 rounded-lg p-4 mb-4 overflow-x-auto">
-        <code className="text-sm text-zinc-300 break-all">
-          https://telescopic.ca/api/integrations/greenhouse/webhook?company_id=YOUR_COMPANY_ID
-        </code>
+      <div className="bg-indigo-950/50 border border-indigo-900 rounded-lg p-4 mb-4">
+        <p className="text-indigo-300 text-sm mb-2">📋 Get your webhook URL:</p>
+        <p className="text-zinc-300 text-sm">
+          Go to your <a href="/dashboard" className="text-white underline hover:text-indigo-300">Telescopic Dashboard</a> → <span className="text-white">Settings</span> tab → copy the <span className="text-white">Greenhouse Webhook URL</span>
+        </p>
       </div>
 
       <ol className="list-decimal list-inside space-y-3 text-zinc-400 mb-8" start={4}>
