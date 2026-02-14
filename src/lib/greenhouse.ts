@@ -49,18 +49,23 @@ export class GreenhouseClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: Omit<RequestInit, 'headers'> & { headers?: Record<string, string> } = {}
   ): Promise<T> {
     const url = `${GREENHOUSE_API_BASE}${endpoint}`;
     
+    const headers: Record<string, string> = {
+      'Authorization': this.getAuthHeader(),
+      'Content-Type': 'application/json',
+      ...options.headers,
+    };
+
+    if (options.headers?.['On-Behalf-Of']) {
+      headers['On-Behalf-Of'] = options.headers['On-Behalf-Of'];
+    }
+
     const response = await fetch(url, {
       ...options,
-      headers: {
-        'Authorization': this.getAuthHeader(),
-        'Content-Type': 'application/json',
-        'On-Behalf-Of': options.headers?.['On-Behalf-Of'] || '',
-        ...options.headers,
-      },
+      headers,
     });
 
     if (!response.ok) {
