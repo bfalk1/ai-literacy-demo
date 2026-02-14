@@ -44,42 +44,56 @@ export default function DashboardPage() {
 
   const loadData = async () => {
     const supabase = getSupabase();
-    if (!supabase) return;
+    if (!supabase) {
+      console.error('[Dashboard] Supabase client not available');
+      return;
+    }
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    console.log('[Dashboard] Auth user:', user?.id, 'Error:', authError);
+    
     if (!user) {
+      console.log('[Dashboard] No user, redirecting to login');
       router.push("/auth/login");
       return;
     }
 
     // Load company
-    const { data: companyData } = await supabase
+    const { data: companyData, error: companyError } = await supabase
       .from('companies')
       .select('*')
       .eq('owner_id', user.id)
       .single();
 
+    console.log('[Dashboard] Company query for owner_id:', user.id);
+    console.log('[Dashboard] Company data:', companyData);
+    console.log('[Dashboard] Company error:', companyError);
+
     if (companyData) {
       setCompany(companyData);
 
       // Load assessments
-      const { data: assessmentData } = await supabase
+      const { data: assessmentData, error: assessmentError } = await supabase
         .from('assessments')
         .select('id, created_at, candidate_name, candidate_email, overall_score, status')
         .eq('company_id', companyData.id)
         .order('created_at', { ascending: false })
         .limit(50);
 
+      console.log('[Dashboard] Assessments:', assessmentData?.length, 'Error:', assessmentError);
       if (assessmentData) setAssessments(assessmentData);
 
       // Load API keys
-      const { data: keyData } = await supabase
+      const { data: keyData, error: keyError } = await supabase
         .from('api_keys')
         .select('id, name, key_prefix, created_at, last_used_at')
         .eq('company_id', companyData.id)
         .order('created_at', { ascending: false });
 
+      console.log('[Dashboard] API Keys:', keyData?.length, 'Error:', keyError);
       if (keyData) setApiKeys(keyData);
+    } else {
+      console.error('[Dashboard] No company found for user:', user.id);
     }
 
     setLoading(false);
