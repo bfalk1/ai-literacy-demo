@@ -18,49 +18,7 @@ export default function AshbyDocsPage() {
         <li>A Telescopic account with API access</li>
       </ul>
 
-      <h2 className="text-lg font-semibold mb-4 mt-10">Step 1: Create an Ashby API Key</h2>
-      <ol className="list-decimal list-inside space-y-3 text-zinc-400 mb-8">
-        <li>Log into Ashby as an admin</li>
-        <li>Navigate to <span className="text-white">Admin → Integrations → API Keys</span></li>
-        <li>Click <span className="text-white">Create API Key</span></li>
-        <li>Name it <code className="bg-zinc-800 px-2 py-0.5 rounded text-sm">Telescopic Integration</code></li>
-        <li>
-          Grant these permissions:
-          <ul className="list-disc list-inside ml-6 mt-2 space-y-1">
-            <li><code className="bg-zinc-800 px-2 py-0.5 rounded text-sm">candidates:read</code></li>
-            <li><code className="bg-zinc-800 px-2 py-0.5 rounded text-sm">candidates:write</code></li>
-            <li><code className="bg-zinc-800 px-2 py-0.5 rounded text-sm">jobs:read</code></li>
-            <li><code className="bg-zinc-800 px-2 py-0.5 rounded text-sm">applications:read</code></li>
-          </ul>
-        </li>
-        <li>Click <span className="text-white">Create</span> and copy the API key</li>
-      </ol>
-
-      <h2 className="text-lg font-semibold mb-4 mt-10">Step 2: Configure Telescopic</h2>
-      <ol className="list-decimal list-inside space-y-3 text-zinc-400 mb-4">
-        <li>Go to your Telescopic Dashboard</li>
-        <li>Navigate to <span className="text-white">Settings → Integrations → Ashby</span></li>
-        <li>Paste your Ashby API key</li>
-        <li>Set your trigger stage (e.g., &quot;Assessment&quot;)</li>
-        <li>Click <span className="text-white">Save</span></li>
-      </ol>
-      
-      <p className="text-zinc-500 mb-4">Or use the API:</p>
-      
-      <div className="bg-zinc-900 rounded-lg p-4 mb-8 overflow-x-auto">
-        <pre className="text-sm text-zinc-300">
-{`curl -X POST https://telescopic.ca/api/integrations/ashby/config \\
-  -H "Authorization: Bearer YOUR_TELESCOPIC_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "ashbyApiKey": "YOUR_ASHBY_API_KEY",
-    "triggerStage": "Assessment",
-    "enabled": true
-  }'`}
-        </pre>
-      </div>
-
-      <h2 className="text-lg font-semibold mb-4 mt-10">Step 3: Set Up Webhook in Ashby</h2>
+      <h2 className="text-lg font-semibold mb-4 mt-10">Step 1: Set Up Webhook in Ashby</h2>
       <p className="text-zinc-400 mb-4">
         Webhooks notify Telescopic when candidates move between interview stages.
       </p>
@@ -95,7 +53,7 @@ export default function AshbyDocsPage() {
         </p>
       </div>
 
-      <h2 className="text-lg font-semibold mb-4 mt-10">Step 4: Create an Assessment Stage</h2>
+      <h2 className="text-lg font-semibold mb-4 mt-10">Step 2: Create an Assessment Stage</h2>
       <p className="text-zinc-400 mb-4">
         Add an interview stage that will trigger assessments:
       </p>
@@ -106,7 +64,7 @@ export default function AshbyDocsPage() {
         <li>Position it where you want candidates to take the assessment</li>
       </ol>
 
-      <h2 className="text-lg font-semibold mb-4 mt-10">Step 5: Test the Integration</h2>
+      <h2 className="text-lg font-semibold mb-4 mt-10">Step 3: Test the Integration</h2>
       <ol className="list-decimal list-inside space-y-3 text-zinc-400 mb-8">
         <li>Move a test candidate to your Assessment stage</li>
         <li>Check that they receive an email with the assessment link</li>
