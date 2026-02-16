@@ -278,19 +278,44 @@ export default function DashboardPage() {
           <>
             <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px' }}>Recent Assessments</h2>
             {assessments.length === 0 ? (
-              <p style={{ color: '#52525b', fontSize: '14px' }}>No assessments yet</p>
+              <p style={{ color: '#52525b', fontSize: '14px' }}>No assessments yet. Assessments will appear here when candidates complete them.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {assessments.map(a => (
-                  <div key={a.id} style={{ backgroundColor: '#18181b', borderRadius: '8px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Link
+                    key={a.id}
+                    href={`/dashboard/assessment/${a.id}`}
+                    style={{
+                      backgroundColor: '#18181b',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#27272a'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#18181b'}
+                  >
                     <div>
-                      <p style={{ fontSize: '14px', fontWeight: 500 }}>{a.candidate_name}</p>
+                      <p style={{ fontSize: '14px', fontWeight: 500, color: '#fff' }}>{a.candidate_name}</p>
                       <p style={{ fontSize: '12px', color: '#71717a' }}>
                         {new Date(a.created_at).toLocaleDateString()} • {a.candidate_email || 'No email'}
                       </p>
                     </div>
-                    <div style={{ fontSize: '24px', fontWeight: 600 }}>{a.overall_score}</div>
-                  </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ 
+                        fontSize: '24px', 
+                        fontWeight: 600,
+                        color: a.overall_score >= 80 ? '#22c55e' : a.overall_score >= 60 ? '#f59e0b' : '#ef4444'
+                      }}>
+                        {a.overall_score}
+                      </div>
+                      <span style={{ color: '#52525b', fontSize: '14px' }}>→</span>
+                    </div>
+                  </Link>
                 ))}
               </div>
             )}
