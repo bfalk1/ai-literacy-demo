@@ -154,28 +154,29 @@ export default function AssessmentPage({ params }: { params: Promise<{ type: str
   const renderEnvironment = (envType: EnvironmentType) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const setRef = (r: any) => { environmentRef.current = r; };
+    const state = assessmentType?.initialState || {};
     
     switch (envType) {
       case "code":
-        return <CodeEnvironment ref={setRef} initialFiles={assessmentType?.initialState?.files as Record<string, string>} />;
+        return <CodeEnvironment ref={setRef} initialFiles={state.files as Record<string, string>} initialOpenFile={state.openFile as string} />;
       case "spreadsheet":
-        return <SpreadsheetEnvironment ref={setRef} />;
+        return <SpreadsheetEnvironment ref={setRef} initialData={state.data as Record<string, { value: string | number }>} initialSheets={state.sheets as string[]} initialActiveSheet={state.activeSheet as string} />;
       case "document":
-        return <DocumentEnvironment ref={setRef} />;
+        return <DocumentEnvironment ref={setRef} initialContent={state.content as string} initialTitle={state.title as string} />;
       case "slides":
-        return <SlidesEnvironment ref={setRef} />;
+        return <SlidesEnvironment ref={setRef} initialSlides={state.slides as Array<{ id: string; title: string; content: string }>} />;
       case "email":
-        return <EmailEnvironment ref={setRef} />;
+        return <EmailEnvironment ref={setRef} initialInbox={state.inbox as Array<{ id: string; from: string; to: string[]; subject: string; body: string; timestamp?: string; read?: boolean }>} initialDrafts={state.drafts as Array<{ id: string; from: string; to: string[]; subject: string; body: string }>} />;
       case "database":
-        return <DatabaseEnvironment ref={setRef} initialSchema={assessmentType?.initialState?.schema as Record<string, string[]>} />;
+        return <DatabaseEnvironment ref={setRef} initialSchema={state.schema as Record<string, string[]>} />;
       case "canvas":
-        return <CanvasEnvironment ref={setRef} />;
+        return <CanvasEnvironment ref={setRef} initialElements={state.elements as Array<{ id: string; type: "rectangle" | "circle" | "text"; x: number; y: number; width: number; height: number; content?: string; fill?: string }>} initialArtboards={state.artboards as Array<{ name: string; width: number; height: number }>} />;
       case "crm":
-        return <CRMEnvironment ref={setRef} />;
+        return <CRMEnvironment ref={setRef} initialRecords={state.records as Array<{ id: string; type: "contact" | "company" | "deal" | "ticket"; name: string; email?: string; company?: string; stage?: string; value?: number; notes?: string[]; activities?: Array<{ type: string; date: string; note: string }>; createdAt: string }>} />;
       case "project-board":
-        return <ProjectBoardEnvironment ref={setRef} />;
+        return <ProjectBoardEnvironment ref={setRef} initialColumns={state.columns as string[]} initialTasks={state.tasks as Array<{ id: string; title: string; column: string; description?: string; assignee?: string; dueDate?: string }>} />;
       case "form-builder":
-        return <FormBuilderEnvironment ref={setRef} />;
+        return <FormBuilderEnvironment ref={setRef} initialFields={state.fields as Array<{ id: string; type: "text" | "number" | "email" | "select" | "multiselect" | "date" | "file" | "rating" | "textarea"; label: string; required?: boolean; options?: string[] }>} initialTitle={state.title as string} />;
       default:
         return <div style={{ padding: "24px", color: "#71717a" }}>Environment not found</div>;
     }

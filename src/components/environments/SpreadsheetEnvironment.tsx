@@ -40,7 +40,20 @@ export const SpreadsheetEnvironment = forwardRef<SpreadsheetEnvironmentRef, Spre
     const [sheets, setSheets] = useState<Record<string, SpreadsheetData>>(() => {
       const initial: Record<string, SpreadsheetData> = {};
       initialSheets.forEach((name, i) => {
-        initial[name] = i === 0 ? initialData : {};
+        if (i === 0 && initialData) {
+          // Convert simple values to CellData format if needed
+          const normalized: SpreadsheetData = {};
+          Object.entries(initialData).forEach(([cell, value]) => {
+            if (typeof value === 'object' && value !== null && 'value' in value) {
+              normalized[cell] = value as CellData;
+            } else {
+              normalized[cell] = { value: value as string | number };
+            }
+          });
+          initial[name] = normalized;
+        } else {
+          initial[name] = {};
+        }
       });
       return initial;
     });
